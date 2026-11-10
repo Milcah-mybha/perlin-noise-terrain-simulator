@@ -1,0 +1,17 @@
+# Build output & binaries
+terrain_simulator
+terrain_simulator.exe
+obj/
+build/
+bin/
+out/
+.cache/
+
+# ImGui local window states
+imgui.ini
+
+# Visual Studio & VS Code local settings
+.vs/
+*.user
+*.suo
+*.log

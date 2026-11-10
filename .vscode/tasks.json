@@ -1,0 +1,40 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build Project",
+            "type": "shell",
+            "command": "make",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": ["$gcc"],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Biên dịch dự án Terrain Simulator bằng make"
+        },
+        {
+            "label": "Run Simulator",
+            "type": "shell",
+            "command": "./terrain_simulator",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "dependsOn": "Build Project",
+            "problemMatcher": [],
+            "detail": "Biên dịch và chạy chương trình Terrain Simulator"
+        },
+        {
+            "label": "Clean Project",
+            "type": "shell",
+            "command": "make clean",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Dọn dẹp các tệp object và binary đã biên dịch"
+        }
+    ]
+}
