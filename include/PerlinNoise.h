@@ -13,6 +13,7 @@ enum PresetType {
     PRESET_SINGLE_OCTAVE = 5
 };
 
+// Lop PerlinNoise cai dat thuat toan sinh nhieu va dia hinh
 class PerlinNoise {
 public:
     PerlinNoise(uint32_t seed = 2026);

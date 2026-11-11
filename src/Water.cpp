@@ -1,5 +1,6 @@
 #include "Water.h"
 
+// Khoi tao doi tuong mat nuoc bien
 Water::Water(float s, float h) : waterHeight(h), size(s), VAO(0), VBO(0), EBO(0), indexCount(0) {
     setupMesh();
 }
@@ -10,6 +11,7 @@ Water::~Water() {
     if (EBO != 0) glDeleteBuffers(1, &EBO);
 }
 
+// Dung luoi da giac phang va thiet lap VAO, VBO, EBO cho mat nuoc
 void Water::setupMesh() {
     const int segments = 70;
     std::vector<float> vertices;
@@ -79,6 +81,7 @@ void Water::setupMesh() {
     glBindVertexArray(0);
 }
 
+// Ve mat nuoc va truyen tham so thoi gian tinh toan song bien
 void Water::draw(const Shader& shader, float time) const {
     if (VAO == 0) return;
     shader.use();

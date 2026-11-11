@@ -14,6 +14,7 @@ struct TerrainVertex {
     float NormalizedHeight;
 };
 
+// Lop Terrain quan ly du lieu dinh, do cao va hien thi dia hinh
 class Terrain {
 public:
     int gridResolution;

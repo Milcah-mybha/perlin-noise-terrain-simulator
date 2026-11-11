@@ -2,6 +2,7 @@
 #include <cmath>
 #include <algorithm>
 
+// Khoi tao camera voi vi tri va goc nhin ban dau
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     : Front(glm::vec3(0.0f, 0.0f, -1.0f)),
       MovementSpeed(42.0f),
@@ -22,10 +23,12 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     updateCameraVectors();
 }
 
+// Tinh ma tran View Matrix cho OpenGL
 glm::mat4 Camera::GetViewMatrix() const {
     return glm::lookAt(Position, Position + Front, Up);
 }
 
+// Xu ly di chuyen camera bang ban phim (WASD, Space, Ctrl)
 void Camera::ProcessKeyboard(Camera_Movement direction) {
     float speedMultiplier = isSprint ? 2.3f : 1.0f;
     float currentSpeed = MovementSpeed * speedMultiplier;
@@ -38,6 +41,7 @@ void Camera::ProcessKeyboard(Camera_Movement direction) {
     if (direction == DOWN)     targetVelocity -= WorldUp * currentSpeed;
 }
 
+// Xu ly xoay goc nhin camera bang chuot
 void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch) {
     xoffset *= MouseSensitivity;
     yoffset *= MouseSensitivity;
@@ -51,12 +55,14 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPi
     }
 }
 
+// Xu ly phong to thu nho (FoV Zoom) bang cuon chuot
 void Camera::ProcessMouseScroll(float yoffset) {
     targetZoom -= yoffset * 2.5f;
     if (targetZoom < 15.0f) targetZoom = 15.0f;
     if (targetZoom > 65.0f) targetZoom = 65.0f;
 }
 
+// Cap nhat vi tri va goc quay camera voi noi suy quan tinh muot ma
 void Camera::Update(float deltaTime) {
     float moveBlend = 1.0f - std::exp(-damping * deltaTime);
     currentVelocity = glm::mix(currentVelocity, targetVelocity, moveBlend);
@@ -73,6 +79,7 @@ void Camera::Update(float deltaTime) {
     updateCameraVectors();
 }
 
+// Dat lai goc nhin camera ve vi tri mac dinh
 void Camera::Reset(glm::vec3 position, float yaw, float pitch) {
     Position = position;
     targetVelocity = glm::vec3(0.0f);
@@ -86,6 +93,7 @@ void Camera::Reset(glm::vec3 position, float yaw, float pitch) {
     updateCameraVectors();
 }
 
+// Cap nhat cac vector huong nhin Front, Right, Up
 void Camera::updateCameraVectors() {
     glm::vec3 front;
     front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));

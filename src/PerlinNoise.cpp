@@ -4,10 +4,12 @@
 #include <algorithm>
 #include <cmath>
 
+// Khoi tao Perlin Noise voi seed ngau nhien
 PerlinNoise::PerlinNoise(uint32_t seed) {
     setSeed(seed);
 }
 
+// Sinh bang hoan vi ngau nhien theo seed
 void PerlinNoise::setSeed(uint32_t seed) {
     currentSeed = seed;
     p.resize(256);
@@ -18,6 +20,7 @@ void PerlinNoise::setSeed(uint32_t seed) {
     p.insert(p.end(), p.begin(), p.end());
 }
 
+// Tinh vector gradient 2D
 float PerlinNoise::grad(int hash, float x, float y) {
     int h = hash & 7;
     float u = h < 4 ? x : y;
@@ -25,6 +28,7 @@ float PerlinNoise::grad(int hash, float x, float y) {
     return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
 }
 
+// Ham tinh gia tri Perlin Noise 2D co so [-1.0, 1.0]
 float PerlinNoise::noise2D(float x, float y) const {
     int X = static_cast<int>(std::floor(x)) & 255;
     int Y = static_cast<int>(std::floor(y)) & 255;
@@ -53,6 +57,7 @@ float PerlinNoise::noise2D(float x, float y) const {
     return lerp(lerpX1, lerpX2, v);
 }
 
+// Thuat toan Fractional Brownian Motion (fBm) ket hop nhieu tang octaves
 float PerlinNoise::fbm2D(float x, float y, int octaves, float persistence, float lacunarity) const {
     float total = 0.0f;
     float frequency = 1.0f;
@@ -72,6 +77,7 @@ float PerlinNoise::fbm2D(float x, float y, int octaves, float persistence, float
     return std::clamp(normalized, 0.0f, 1.0f);
 }
 
+// Thuat toan Ridged Multifractal tao song nui sac nhon
 float PerlinNoise::ridged2D(float x, float y, int octaves, float persistence, float lacunarity) const {
     float total = 0.0f;
     float frequency = 1.0f;
@@ -96,6 +102,7 @@ float PerlinNoise::ridged2D(float x, float y, int octaves, float persistence, fl
     return std::clamp(total / maxValue, 0.0f, 1.0f);
 }
 
+// Thuat toan tao bac thang tram tich dia chat (Terraced Noise)
 float PerlinNoise::terraced2D(float x, float y, int octaves, float steps) const {
     float h = fbm2D(x, y, octaves, 0.5f, 2.0f);
     float frac = (h * steps) - std::floor(h * steps);
@@ -103,6 +110,7 @@ float PerlinNoise::terraced2D(float x, float y, int octaves, float steps) const 
     return (std::floor(h * steps) + smoothFrac * 0.35f) / steps;
 }
 
+// Sinh dia hinh quan dao tu nhien ket hop bien dang toa do (Domain Warping)
 float PerlinNoise::island2D(float x, float y, float normalizedDist, int octaves, float persistence, float lacunarity) const {
     float qx = noise2D(x * 0.85f, y * 0.85f);
     float qy = noise2D(x * 0.85f + 5.2f, y * 0.85f + 1.3f);

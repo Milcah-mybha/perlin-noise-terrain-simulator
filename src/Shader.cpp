@@ -4,6 +4,7 @@
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 
+// Doc file nguon va bien dich Vertex Shader, Fragment Shader
 Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     std::string vertexCode;
     std::string fragmentCode;
@@ -54,14 +55,17 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     glDeleteShader(fragment);
 }
 
+// Giai phong chuong trinh shader tren GPU
 Shader::~Shader() {
     glDeleteProgram(ID);
 }
 
+// Kich hoat shader program de su dung
 void Shader::use() const {
     glUseProgram(ID);
 }
 
+// Cac ham truyen gia tri bien Uniform vao shader
 void Shader::setBool(const std::string& name, bool value) const {
     glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
 }
@@ -86,6 +90,7 @@ void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
     glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
+// Kiem tra va in thong bao loi bien dich hoac lien ket shader
 void Shader::checkCompileErrors(unsigned int shader, const std::string& type) {
     int success;
     char infoLog[1024];

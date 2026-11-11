@@ -2,6 +2,7 @@
 #include <cmath>
 #include <algorithm>
 
+// Khoi tao du lieu dia hinh
 Terrain::Terrain(int resolution, float size)
     : gridResolution(resolution),
       worldSize(size),
@@ -27,6 +28,7 @@ Terrain::~Terrain() {
     if (skirtEBO != 0) glDeleteBuffers(1, &skirtEBO);
 }
 
+// Ap dung bo thong so dia hinh mau (Presets)
 void Terrain::applyPreset(PresetType preset, PerlinNoise& noise) {
     currentPreset = preset;
     switch (preset) {
@@ -82,6 +84,7 @@ void Terrain::applyPreset(PresetType preset, PerlinNoise& noise) {
     generate(noise);
 }
 
+// Sinh ban do do cao, tinh phap tuyen va ghep tam giac luoi
 void Terrain::generate(PerlinNoise& noise) {
     vertices.clear();
     indices.clear();
@@ -196,6 +199,7 @@ void Terrain::generate(PerlinNoise& noise) {
     setupMesh();
 }
 
+// Dung vach chan dia tang chim duoi nuoc
 void Terrain::buildSkirt(const std::vector<float>& heightMap) {
     skirtVertices.clear();
     skirtIndices.clear();
@@ -259,6 +263,7 @@ void Terrain::buildSkirt(const std::vector<float>& heightMap) {
     skirtIndexCount = static_cast<int>(skirtIndices.size());
 }
 
+// Tinh ty le dien tich dat lien noi tren mat nuoc
 float Terrain::getLandPercentage() const {
     if (vertices.empty()) return 50.0f;
     int landCount = 0;
@@ -270,6 +275,7 @@ float Terrain::getLandPercentage() const {
     return (static_cast<float>(landCount) / vertices.size()) * 100.0f;
 }
 
+// Cau hinh VAO, VBO, EBO cho dia hinh va chan vach
 void Terrain::setupMesh() {
     if (VAO == 0) {
         glGenVertexArrays(1, &VAO);
@@ -314,6 +320,7 @@ void Terrain::setupMesh() {
     glBindVertexArray(0);
 }
 
+// Ve dia hinh va vach chan len GPU
 void Terrain::draw(const Shader& shader) const {
     if (VAO == 0 || indexCount == 0) return;
 

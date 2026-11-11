@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include "Shader.h"
 
+// Lop Water quan ly luoi da giac va ve mat nuoc bien
 class Water {
 public:
     float waterHeight;

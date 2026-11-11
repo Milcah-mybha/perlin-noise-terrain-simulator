@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <string>
 
+// Lop Shader quan ly nap, bien dich va truyen bien uniform cho GLSL
 class Shader {
 public:
     unsigned int ID;

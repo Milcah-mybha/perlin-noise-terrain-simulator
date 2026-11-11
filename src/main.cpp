@@ -50,7 +50,9 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 void processInput(GLFWwindow* window);
 void setupImGuiTheme();
 
+// Ham main: khoi tao GLFW, OpenGL va chay chuong trinh
 int main() {
+    // Khoi tao GLFW va tao cua so hien thi
     if (!glfwInit()) {
         std::cerr << "Lỗi: Không khởi tạo được GLFW!" << std::endl;
         return -1;
@@ -71,6 +73,7 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
 
+    // Nap cac con tro ham OpenGL qua thu vien GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Lỗi: Không nạp được GLAD!" << std::endl;
         return -1;
@@ -80,6 +83,7 @@ int main() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    // Cau hinh Dear ImGui va phông chu tieng Viet
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -106,6 +110,7 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
+    // Khoi tao Shader, dia hinh 3D va mat nuoc bien
     Shader terrainShader("shaders/terrain.vert", "shaders/terrain.frag");
     Shader waterShader("shaders/water.vert", "shaders/water.frag");
 
@@ -116,6 +121,7 @@ int main() {
     Water water(420.0f, terrain.waterLevel * terrain.heightScale);
     glm::vec3 skyColor(0.60f, 0.73f, 0.88f);
 
+    // Vong lap render chinh
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
@@ -151,6 +157,7 @@ int main() {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
 
+        // Ve dia hinh 3D
         terrainShader.use();
         terrainShader.setMat4("projection", projection);
         terrainShader.setMat4("view", view);
@@ -166,6 +173,7 @@ int main() {
 
         terrain.draw(terrainShader);
 
+        // Ve mat nuoc bien dai duong
         if (renderWater && !wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             waterShader.use();
@@ -183,6 +191,7 @@ int main() {
 
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+        // Bang thong so dia hinh goc trai man hinh
         ImGui::SetNextWindowPos(ImVec2(16, 16), ImGuiCond_Always);
         ImGui::SetNextWindowBgAlpha(0.85f);
         ImGui::Begin("Thống Số##StatsCard", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove);
@@ -224,6 +233,7 @@ int main() {
         }
         ImGui::End();
 
+        // Bang dieu khien thong so chinh ben phai man hinh
         if (showControlPanel) {
             float panelWidth = 410.0f;
             ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - panelWidth - 16, 62), ImGuiCond_Always);
@@ -376,6 +386,7 @@ int main() {
     return 0;
 }
 
+// Xu ly su kien ban phim di chuyen camera va cac phim tat
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         if (fpsMode) {
@@ -426,6 +437,7 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_RELEASE) tabPressed = false;
 }
 
+// Xu ly su kien nhan giu chuot trai/phai de xoay goc nhin
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -444,6 +456,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     }
 }
 
+// Xu ly su kien di chuyen con tro chuot
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
@@ -465,6 +478,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     }
 }
 
+// Xu ly su kien cuon chuot de thu phong goc nhin (FoV Zoom)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     ImGuiIO& io = ImGui::GetIO();
     if (!io.WantCaptureMouse) {
@@ -472,6 +486,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     }
 }
 
+// Xu ly khi nguoi dung thay doi kich thuoc cua so
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     if (width > 0 && height > 0) {
         windowWidth = width;
@@ -480,6 +495,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     }
 }
 
+// Cau hinh chu de mau sac hien dai cho giao dien ImGui
 void setupImGuiTheme() {
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec4* colors = style.Colors;

@@ -18,6 +18,7 @@ void main() {
     vec3 shallowColor = vec3(0.20, 0.62, 0.80);
     vec3 deepColor    = vec3(0.08, 0.32, 0.54);
 
+    // Phan xa Fresnel, mau nuoc bien va anh sang mat troi tren song
     float fresnel = pow(1.0 - max(dot(norm, viewDir), 0.0), 3.0);
     vec3 waterColor = mix(deepColor, shallowColor, 0.55);
 

@@ -17,6 +17,7 @@ uniform float uWaterHeight;
 void main() {
     vec3 pos = aPos;
 
+    // Bien dang song nuoc theo thoi gian va tinh dao ham phap tuyen
     float wave1 = sin(pos.x * 0.15 + uTime * 2.0) * 0.25;
     float wave2 = cos(pos.z * 0.20 + uTime * 1.5) * 0.20;
     float wave3 = sin((pos.x + pos.z) * 0.10 + uTime * 2.5) * 0.15;

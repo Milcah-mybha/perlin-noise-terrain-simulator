@@ -15,6 +15,7 @@ uniform vec3 uViewPos;
 uniform float uWaterLevel;
 uniform int uColorMode;
 
+// Phan chia mau sinh thai (cat, co, rung, da, tuyet) theo do cao va do doc
 vec3 getBiomeColor(float t, float w, float slope) {
     vec3 deepWater   = vec3(0.08, 0.26, 0.38);
     vec3 shallowSand = vec3(0.86, 0.80, 0.62);
@@ -49,6 +50,7 @@ vec3 getBiomeColor(float t, float w, float slope) {
     return c;
 }
 
+// Bang mau nhiet do cao (Heatmap)
 vec3 getHeatmapColor(float t) {
     if (t < 0.25) return mix(vec3(0.0, 0.15, 0.85), vec3(0.0, 0.85, 0.85), t / 0.25);
     if (t < 0.50) return mix(vec3(0.0, 0.85, 0.85), vec3(0.2, 0.85, 0.2), (t - 0.25) / 0.25);
@@ -56,6 +58,7 @@ vec3 getHeatmapColor(float t) {
     return mix(vec3(0.95, 0.85, 0.1), vec3(0.95, 0.15, 0.15), (t - 0.75) / 0.25);
 }
 
+// Bang mau thang xam (Grayscale)
 vec3 getGrayscaleColor(float t) {
     return vec3(t * 0.88 + 0.08);
 }
@@ -90,6 +93,7 @@ void main() {
         }
     }
 
+    // Chieu sang Blinn-Phong va anh sang moi truong ban cau
     float skyHemisphere = norm.y * 0.5 + 0.5;
     vec3 ambient = mix(uAmbientColor * 0.85, uAmbientColor * 1.15, skyHemisphere) * albedo;
 

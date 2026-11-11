@@ -13,6 +13,7 @@ enum Camera_Movement {
     DOWN
 };
 
+// Lop Camera quan ly goc nhin va di chuyen trong khong gian 3D
 class Camera {
 public:
     glm::vec3 Position;
