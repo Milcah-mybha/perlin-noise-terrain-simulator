@@ -32,12 +32,12 @@ void Terrain::applyPreset(PresetType preset, PerlinNoise& noise) {
     currentPreset = preset;
     switch (preset) {
         case PRESET_ISLANDS:
-            freq = 2.4f;
+            freq = 2.2f;
             octaves = 6;
             lacunarity = 2.1f;
             persistence = 0.50f;
-            heightScale = 26.0f;
-            waterLevel = 0.44f;
+            heightScale = 30.0f;
+            waterLevel = 0.35f;
             break;
         case PRESET_ROLLING_HILLS:
             freq = 2.0f;

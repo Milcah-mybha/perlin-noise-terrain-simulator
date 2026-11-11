@@ -109,15 +109,27 @@ float PerlinNoise::terraced2D(float x, float y, int octaves, float steps) const 
     return (std::floor(h * steps) + smoothFrac * 0.35f) / steps;
 }
 
-// Sinh địa hình quần đảo tự nhiên (thoải dần ra biển)
+// Sinh địa hình quần đảo tự nhiên (địa mạo chân thực với vịnh, bán đảo và rặng núi)
 float PerlinNoise::island2D(float x, float y, float normalizedDist, int octaves, float persistence, float lacunarity) const {
-    float baseH = fbm2D(x, y, octaves, persistence, lacunarity);
-    float coastWarp = noise2D(x * 1.5f, y * 1.5f) * 0.22f;
-    float d = normalizedDist + coastWarp;
+    float qx = noise2D(x * 0.85f, y * 0.85f);
+    float qy = noise2D(x * 0.85f + 5.2f, y * 0.85f + 1.3f);
 
-    float mask = std::clamp(1.0f - (d - 0.35f) / (0.85f - 0.35f), 0.0f, 1.0f);
-    mask = mask * mask * (3.0f - 2.0f * mask);
+    float rx = noise2D(x + 1.2f * qx, y + 1.2f * qy);
+    float ry = noise2D(x + 1.2f * qx + 3.4f, y + 1.2f * qy + 7.1f);
 
-    float finalH = (baseH * 0.70f + 0.30f) * mask;
+    float wx = x + 0.45f * rx;
+    float wy = y + 0.45f * ry;
+
+    float baseFbm = fbm2D(wx, wy, octaves, persistence, lacunarity);
+    float ridges  = ridged2D(wx * 1.3f, wy * 1.3f, std::max(1, octaves - 1), 0.5f, 2.0f);
+    float terrain = baseFbm * 0.70f + ridges * 0.30f;
+
+    float warpDist = noise2D(x * 0.75f + 1.7f, y * 0.75f + 2.8f) * 0.28f;
+    float dist = normalizedDist + warpDist;
+
+    float falloff = std::clamp((dist - 0.25f) / 0.65f, 0.0f, 1.0f);
+    falloff = falloff * falloff;
+
+    float finalH = terrain - falloff * 0.75f;
     return std::clamp(finalH, 0.0f, 1.0f);
 }

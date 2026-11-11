@@ -253,7 +253,7 @@ int main() {
 
             ImGui::TextColored(ImVec4(0.45f, 0.75f, 1.0f, 1.0f), "1. CÁC DẠNG ĐỊA HÌNH MẪU (PRESETS):");
             
-            float btnW = 188.0f;
+            float btnW = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
             float btnH = 30.0f;
 
             if (ImGui::Button("Quần đảo tự nhiên", ImVec2(btnW, btnH))) {
@@ -287,16 +287,41 @@ int main() {
             
             bool needRegen = false;
 
-            ImGui::PushItemWidth(160.0f);
-            needRegen |= ImGui::SliderFloat("Tần số sóng", &terrain.freq, 1.0f, 6.0f, "%.1f");
-            needRegen |= ImGui::SliderInt("Số tầng chi tiết", &terrain.octaves, 1, 9);
-            needRegen |= ImGui::SliderFloat("Độ biến thiên", &terrain.lacunarity, 1.4f, 3.0f, "%.2f");
-            needRegen |= ImGui::SliderFloat("Độ sắc nét", &terrain.persistence, 0.2f, 0.85f, "%.2f");
-            needRegen |= ImGui::SliderFloat("Chiều cao núi", &terrain.heightScale, 10.0f, 60.0f, "%.1f m");
-            
-            if (ImGui::SliderFloat("Mực nước biển", &terrain.waterLevel, 0.05f, 0.85f, "%.2f")) {
-            }
-            ImGui::PopItemWidth();
+            ImGui::TextUnformatted("Tần số sóng (Frequency)");
+            ImGui::SameLine(ImGui::GetWindowWidth() - 85.0f);
+            ImGui::TextColored(ImVec4(0.35f, 0.85f, 1.0f, 1.0f), "%.1f", terrain.freq);
+            ImGui::SetNextItemWidth(-1.0f);
+            needRegen |= ImGui::SliderFloat("##Frequency", &terrain.freq, 1.0f, 6.0f, "");
+
+            ImGui::TextUnformatted("Số tầng chi tiết (Octaves)");
+            ImGui::SameLine(ImGui::GetWindowWidth() - 85.0f);
+            ImGui::TextColored(ImVec4(0.35f, 0.85f, 1.0f, 1.0f), "%d tầng", terrain.octaves);
+            ImGui::SetNextItemWidth(-1.0f);
+            needRegen |= ImGui::SliderInt("##Octaves", &terrain.octaves, 1, 9, "");
+
+            ImGui::TextUnformatted("Độ biến thiên (Lacunarity)");
+            ImGui::SameLine(ImGui::GetWindowWidth() - 85.0f);
+            ImGui::TextColored(ImVec4(0.35f, 0.85f, 1.0f, 1.0f), "%.2f", terrain.lacunarity);
+            ImGui::SetNextItemWidth(-1.0f);
+            needRegen |= ImGui::SliderFloat("##Lacunarity", &terrain.lacunarity, 1.4f, 3.0f, "");
+
+            ImGui::TextUnformatted("Độ sắc nét (Persistence)");
+            ImGui::SameLine(ImGui::GetWindowWidth() - 85.0f);
+            ImGui::TextColored(ImVec4(0.35f, 0.85f, 1.0f, 1.0f), "%.2f", terrain.persistence);
+            ImGui::SetNextItemWidth(-1.0f);
+            needRegen |= ImGui::SliderFloat("##Persistence", &terrain.persistence, 0.2f, 0.85f, "");
+
+            ImGui::TextUnformatted("Chiều cao núi (Height Scale)");
+            ImGui::SameLine(ImGui::GetWindowWidth() - 85.0f);
+            ImGui::TextColored(ImVec4(0.35f, 0.85f, 1.0f, 1.0f), "%.1f m", terrain.heightScale);
+            ImGui::SetNextItemWidth(-1.0f);
+            needRegen |= ImGui::SliderFloat("##HeightScale", &terrain.heightScale, 10.0f, 60.0f, "");
+
+            ImGui::TextUnformatted("Mực nước biển (Sea Level)");
+            ImGui::SameLine(ImGui::GetWindowWidth() - 85.0f);
+            ImGui::TextColored(ImVec4(0.35f, 0.85f, 1.0f, 1.0f), "%.0f %%", terrain.waterLevel * 100.0f);
+            ImGui::SetNextItemWidth(-1.0f);
+            ImGui::SliderFloat("##WaterLevel", &terrain.waterLevel, 0.05f, 0.85f, "");
 
             if (needRegen) {
                 terrain.generate(perlin);

@@ -17,25 +17,35 @@ uniform int uColorMode;
 
 // Phân bố màu sinh thái tự nhiên theo độ cao và độ dốc
 vec3 getBiomeColor(float t, float w, float slope) {
-    vec3 c;
-    if (t < w - 0.04) {
-        c = vec3(0.14, 0.30, 0.38);
-    } else if (t < w + 0.035) {
-        c = vec3(0.88, 0.82, 0.62);
-    } else if (t < 0.60) {
-        float k = clamp((t - (w + 0.035)) / 0.16, 0.0, 1.0);
-        c = mix(vec3(0.38, 0.65, 0.30), vec3(0.24, 0.48, 0.22), k);
-    } else if (t < 0.78) {
-        float k = (t - 0.60) / 0.18;
-        c = mix(vec3(0.24, 0.48, 0.22), vec3(0.55, 0.50, 0.45), k);
-    } else {
-        float k = clamp((t - 0.78) / 0.12, 0.0, 1.0);
-        c = mix(vec3(0.55, 0.50, 0.45), vec3(0.96, 0.97, 0.99), k);
-    }
+    vec3 deepWater   = vec3(0.08, 0.26, 0.38);
+    vec3 shallowSand = vec3(0.86, 0.80, 0.62);
+    vec3 grassLush   = vec3(0.32, 0.60, 0.24);
+    vec3 forestDark  = vec3(0.20, 0.44, 0.18);
+    vec3 rockGray    = vec3(0.48, 0.45, 0.42);
+    vec3 snowWhite   = vec3(0.96, 0.97, 0.99);
 
-    float s = clamp((slope - 0.32) / 0.42, 0.0, 1.0);
-    if (t > w + 0.035) {
-        c = mix(c, vec3(0.46, 0.42, 0.38), s * 0.85);
+    vec3 c;
+    if (t < w) {
+        float depth = clamp((w - t) / 0.12, 0.0, 1.0);
+        c = mix(shallowSand * 0.72, deepWater, depth);
+    } else {
+        float alt = t - w;
+        if (alt < 0.04) {
+            float k = alt / 0.04;
+            c = mix(shallowSand, grassLush, smoothstep(0.0, 1.0, k));
+        } else if (alt < 0.32) {
+            float k = (alt - 0.04) / 0.28;
+            c = mix(grassLush, forestDark, smoothstep(0.0, 1.0, k));
+        } else if (alt < 0.52) {
+            float k = (alt - 0.32) / 0.20;
+            c = mix(forestDark, rockGray, smoothstep(0.0, 1.0, k));
+        } else {
+            float k = clamp((alt - 0.52) / 0.18, 0.0, 1.0);
+            c = mix(rockGray, snowWhite, smoothstep(0.0, 1.0, k));
+        }
+
+        float cliffFactor = smoothstep(0.25, 0.65, slope);
+        c = mix(c, rockGray, cliffFactor * 0.88);
     }
     return c;
 }
