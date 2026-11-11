@@ -1,4 +1,3 @@
-// Cấu hình compile-time cho Dear ImGui
 #pragma once
 
 //---- Define assertion handler. Defaults to calling assert().

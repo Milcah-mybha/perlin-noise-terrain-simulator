@@ -15,7 +15,6 @@ uniform vec3 uViewPos;
 uniform float uWaterLevel;
 uniform int uColorMode;
 
-// Phân bố màu sinh thái tự nhiên theo độ cao và độ dốc
 vec3 getBiomeColor(float t, float w, float slope) {
     vec3 deepWater   = vec3(0.08, 0.26, 0.38);
     vec3 shallowSand = vec3(0.86, 0.80, 0.62);
@@ -50,7 +49,6 @@ vec3 getBiomeColor(float t, float w, float slope) {
     return c;
 }
 
-// Bảng màu nhiệt đồ độ cao
 vec3 getHeatmapColor(float t) {
     if (t < 0.25) return mix(vec3(0.0, 0.15, 0.85), vec3(0.0, 0.85, 0.85), t / 0.25);
     if (t < 0.50) return mix(vec3(0.0, 0.85, 0.85), vec3(0.2, 0.85, 0.2), (t - 0.25) / 0.25);
@@ -58,7 +56,6 @@ vec3 getHeatmapColor(float t) {
     return mix(vec3(0.95, 0.85, 0.1), vec3(0.95, 0.15, 0.15), (t - 0.75) / 0.25);
 }
 
-// Bảng màu thang xám
 vec3 getGrayscaleColor(float t) {
     return vec3(t * 0.88 + 0.08);
 }
@@ -93,7 +90,6 @@ void main() {
         }
     }
 
-    // Chiếu sáng Blinn-Phong và ánh sáng môi trường
     float skyHemisphere = norm.y * 0.5 + 0.5;
     vec3 ambient = mix(uAmbientColor * 0.85, uAmbientColor * 1.15, skyHemisphere) * albedo;
 
@@ -109,7 +105,6 @@ void main() {
 
     vec3 finalColor = ambient + diffuse + specular;
 
-    // Sương mù chân trời
     vec3 skyHorizon = vec3(0.60, 0.73, 0.88);
     float dist = length(uViewPos - FragPos);
     float fog = clamp((dist - 140.0) / 380.0, 0.0, 0.70);

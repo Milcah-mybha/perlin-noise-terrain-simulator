@@ -1,4 +1,3 @@
-// Định nghĩa lớp Shader nạp và kích hoạt GLSL
 #ifndef SHADER_H
 #define SHADER_H
 
@@ -10,14 +9,11 @@ class Shader {
 public:
     unsigned int ID;
 
-    // Đọc và biên dịch Shader
     Shader(const char* vertexPath, const char* fragmentPath);
     ~Shader();
 
-    // Kích hoạt Shader Program
     void use() const;
 
-    // Truyền dữ liệu Uniform vào Shader
     void setBool(const std::string& name, bool value) const;
     void setInt(const std::string& name, int value) const;
     void setFloat(const std::string& name, float value) const;

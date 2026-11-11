@@ -1,4 +1,3 @@
-// Định nghĩa giao diện hàm OpenGL GLAD
 #ifndef __glad_h_
 #define __glad_h_
 

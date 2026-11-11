@@ -1,4 +1,3 @@
-// Điểm khởi chạy chương trình, quản lý vòng lặp và giao diện người dùng
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -52,7 +51,6 @@ void processInput(GLFWwindow* window);
 void setupImGuiTheme();
 
 int main() {
-    // Khởi tạo GLFW
     if (!glfwInit()) {
         std::cerr << "Lỗi: Không khởi tạo được GLFW!" << std::endl;
         return -1;
@@ -73,7 +71,6 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
 
-    // Nạp con trỏ hàm OpenGL qua GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Lỗi: Không nạp được GLAD!" << std::endl;
         return -1;
@@ -83,7 +80,6 @@ int main() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // Cấu hình Dear ImGui và phông chữ tiếng Việt Unicode
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -110,7 +106,6 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    // Khởi tạo Shader và các đối tượng 3D
     Shader terrainShader("shaders/terrain.vert", "shaders/terrain.frag");
     Shader waterShader("shaders/water.vert", "shaders/water.frag");
 
@@ -121,7 +116,6 @@ int main() {
     Water water(420.0f, terrain.waterLevel * terrain.heightScale);
     glm::vec3 skyColor(0.60f, 0.73f, 0.88f);
 
-    // Vòng lặp dựng hình chính
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
@@ -151,7 +145,6 @@ int main() {
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 model = glm::mat4(1.0f);
 
-        // Vẽ địa hình
         if (wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         } else {
@@ -173,7 +166,6 @@ int main() {
 
         terrain.draw(terrainShader);
 
-        // Vẽ mặt nước đại dương
         if (renderWater && !wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             waterShader.use();
@@ -189,10 +181,8 @@ int main() {
             water.draw(waterShader, currentFrame);
         }
 
-        // Render giao diện ImGui
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        // Bảng thông số góc trái
         ImGui::SetNextWindowPos(ImVec2(16, 16), ImGuiCond_Always);
         ImGui::SetNextWindowBgAlpha(0.85f);
         ImGui::Begin("Thống Số##StatsCard", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove);
@@ -219,7 +209,6 @@ int main() {
         }
         ImGui::End();
 
-        // Thanh nút tác vụ góc trên phải
         float topBarWidth = showControlPanel ? 360.0f : 240.0f;
         ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - topBarWidth - 16, 16), ImGuiCond_Always);
         ImGui::SetNextWindowBgAlpha(0.85f);
@@ -235,7 +224,6 @@ int main() {
         }
         ImGui::End();
 
-        // Bảng điều khiển chính bên phải
         if (showControlPanel) {
             float panelWidth = 410.0f;
             ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - panelWidth - 16, 62), ImGuiCond_Always);
@@ -388,7 +376,6 @@ int main() {
     return 0;
 }
 
-// Xử lý sự kiện bàn phím
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         if (fpsMode) {
@@ -439,7 +426,6 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_RELEASE) tabPressed = false;
 }
 
-// Xử lý sự kiện nút chuột
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -458,7 +444,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     }
 }
 
-// Xử lý sự kiện di chuyển chuột
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
@@ -480,7 +465,6 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     }
 }
 
-// Xử lý sự kiện cuộn chuột
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     ImGuiIO& io = ImGui::GetIO();
     if (!io.WantCaptureMouse) {
@@ -488,7 +472,6 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     }
 }
 
-// Xử lý thay đổi kích thước cửa sổ
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     if (width > 0 && height > 0) {
         windowWidth = width;
@@ -497,7 +480,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     }
 }
 
-// Cấu hình giao diện màu sắc ImGui
 void setupImGuiTheme() {
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec4* colors = style.Colors;

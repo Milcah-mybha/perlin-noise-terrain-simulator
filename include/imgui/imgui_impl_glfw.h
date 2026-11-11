@@ -1,4 +1,3 @@
-// Header backend GLFW cho Dear ImGui
 #pragma once
 #include "imgui.h"
 #ifndef IMGUI_DISABLE

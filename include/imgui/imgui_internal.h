@@ -1,4 +1,3 @@
-// Các cấu trúc nội bộ và API mở rộng Dear ImGui
 #pragma once
 #ifndef IMGUI_DISABLE
 

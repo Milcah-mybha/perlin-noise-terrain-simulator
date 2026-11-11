@@ -1,4 +1,3 @@
-// Trình nạp con trỏ hàm OpenGL đa nền tảng GLAD
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

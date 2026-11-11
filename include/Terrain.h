@@ -1,4 +1,3 @@
-// Định nghĩa lớp Terrain quản lý dữ liệu đỉnh và hiển thị địa hình
 #ifndef TERRAIN_H
 #define TERRAIN_H
 
@@ -31,13 +30,10 @@ public:
     Terrain(int resolution = 180, float size = 120.0f);
     ~Terrain();
 
-    // Sinh bản đồ độ cao và dựng lưới 3D
     void generate(PerlinNoise& noise);
 
-    // Áp dụng bộ thông số địa hình mẫu
     void applyPreset(PresetType preset, PerlinNoise& noise);
 
-    // Vẽ địa hình lên GPU
     void draw(const Shader& shader) const;
 
     float getMinHeight() const { return minHeight; }

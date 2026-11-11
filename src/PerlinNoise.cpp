@@ -1,11 +1,9 @@
-// Thuật toán sinh nhiễu Perlin Noise và các biến thể địa hình (fBm, Ridged, Quần đảo)
 #include "PerlinNoise.h"
 #include <numeric>
 #include <random>
 #include <algorithm>
 #include <cmath>
 
-// Khởi tạo bảng hoán vị ngẫu nhiên theo seed
 PerlinNoise::PerlinNoise(uint32_t seed) {
     setSeed(seed);
 }
@@ -20,7 +18,6 @@ void PerlinNoise::setSeed(uint32_t seed) {
     p.insert(p.end(), p.begin(), p.end());
 }
 
-// Gradient Isotropic 2D
 float PerlinNoise::grad(int hash, float x, float y) {
     int h = hash & 7;
     float u = h < 4 ? x : y;
@@ -28,7 +25,6 @@ float PerlinNoise::grad(int hash, float x, float y) {
     return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
 }
 
-// Tính giá trị Perlin Noise 2D tại điểm (x, y)
 float PerlinNoise::noise2D(float x, float y) const {
     int X = static_cast<int>(std::floor(x)) & 255;
     int Y = static_cast<int>(std::floor(y)) & 255;
@@ -57,7 +53,6 @@ float PerlinNoise::noise2D(float x, float y) const {
     return lerp(lerpX1, lerpX2, v);
 }
 
-// Thuật toán Fractal Brownian Motion (fBm)
 float PerlinNoise::fbm2D(float x, float y, int octaves, float persistence, float lacunarity) const {
     float total = 0.0f;
     float frequency = 1.0f;
@@ -77,7 +72,6 @@ float PerlinNoise::fbm2D(float x, float y, int octaves, float persistence, float
     return std::clamp(normalized, 0.0f, 1.0f);
 }
 
-// Thuật toán Ridged Multifractal tạo sống núi nhọn
 float PerlinNoise::ridged2D(float x, float y, int octaves, float persistence, float lacunarity) const {
     float total = 0.0f;
     float frequency = 1.0f;
@@ -102,7 +96,6 @@ float PerlinNoise::ridged2D(float x, float y, int octaves, float persistence, fl
     return std::clamp(total / maxValue, 0.0f, 1.0f);
 }
 
-// Thuật toán bậc thang trầm tích
 float PerlinNoise::terraced2D(float x, float y, int octaves, float steps) const {
     float h = fbm2D(x, y, octaves, 0.5f, 2.0f);
     float frac = (h * steps) - std::floor(h * steps);
@@ -110,7 +103,6 @@ float PerlinNoise::terraced2D(float x, float y, int octaves, float steps) const 
     return (std::floor(h * steps) + smoothFrac * 0.35f) / steps;
 }
 
-// Sinh địa hình quần đảo tự nhiên (địa mạo chân thực với vịnh, bán đảo và rặng núi)
 float PerlinNoise::island2D(float x, float y, float normalizedDist, int octaves, float persistence, float lacunarity) const {
     float qx = noise2D(x * 0.85f, y * 0.85f);
     float qy = noise2D(x * 0.85f + 5.2f, y * 0.85f + 1.3f);

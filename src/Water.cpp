@@ -1,4 +1,3 @@
-// Dựng lưới mặt nước và hiệu ứng sóng biển đại dương
 #include "Water.h"
 
 Water::Water(float s, float h) : waterHeight(h), size(s), VAO(0), VBO(0), EBO(0), indexCount(0) {
@@ -11,7 +10,6 @@ Water::~Water() {
     if (EBO != 0) glDeleteBuffers(1, &EBO);
 }
 
-// Khởi tạo lưới phẳng cho mặt nước
 void Water::setupMesh() {
     const int segments = 70;
     std::vector<float> vertices;
@@ -81,7 +79,6 @@ void Water::setupMesh() {
     glBindVertexArray(0);
 }
 
-// Vẽ mặt nước lên GPU
 void Water::draw(const Shader& shader, float time) const {
     if (VAO == 0) return;
     shader.use();

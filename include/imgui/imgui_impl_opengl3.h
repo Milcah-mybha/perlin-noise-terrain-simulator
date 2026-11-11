@@ -1,4 +1,3 @@
-// Header backend OpenGL3 cho Dear ImGui
 #pragma once
 #include "imgui.h"      // IMGUI_IMPL_API
 #ifndef IMGUI_DISABLE

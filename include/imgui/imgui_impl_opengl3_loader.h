@@ -1,4 +1,3 @@
-// Trình nạp con trỏ hàm OpenGL nhúng cho ImGui OpenGL3 Backend
 #ifndef __gl3w_h_
 #define __gl3w_h_
 

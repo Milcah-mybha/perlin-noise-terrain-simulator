@@ -1,9 +1,7 @@
-// Điều khiển camera quan sát 3D (xoay, di chuyển, zoom mượt)
 #include "Camera.h"
 #include <cmath>
 #include <algorithm>
 
-// Khởi tạo camera và thông số góc nhìn
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     : Front(glm::vec3(0.0f, 0.0f, -1.0f)),
       MovementSpeed(42.0f),
@@ -24,12 +22,10 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     updateCameraVectors();
 }
 
-// Tính ma trận View
 glm::mat4 Camera::GetViewMatrix() const {
     return glm::lookAt(Position, Position + Front, Up);
 }
 
-// Xử lý di chuyển phím WASD
 void Camera::ProcessKeyboard(Camera_Movement direction) {
     float speedMultiplier = isSprint ? 2.3f : 1.0f;
     float currentSpeed = MovementSpeed * speedMultiplier;
@@ -42,7 +38,6 @@ void Camera::ProcessKeyboard(Camera_Movement direction) {
     if (direction == DOWN)     targetVelocity -= WorldUp * currentSpeed;
 }
 
-// Xử lý xoay góc nhìn chuột
 void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch) {
     xoffset *= MouseSensitivity;
     yoffset *= MouseSensitivity;
@@ -56,14 +51,12 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPi
     }
 }
 
-// Xử lý zoom bằng cuộn chuột
 void Camera::ProcessMouseScroll(float yoffset) {
     targetZoom -= yoffset * 2.5f;
     if (targetZoom < 15.0f) targetZoom = 15.0f;
     if (targetZoom > 65.0f) targetZoom = 65.0f;
 }
 
-// Cập nhật vị trí và góc nhìn với quán tính mượt mà
 void Camera::Update(float deltaTime) {
     float moveBlend = 1.0f - std::exp(-damping * deltaTime);
     currentVelocity = glm::mix(currentVelocity, targetVelocity, moveBlend);
@@ -80,7 +73,6 @@ void Camera::Update(float deltaTime) {
     updateCameraVectors();
 }
 
-// Đặt lại vị trí camera
 void Camera::Reset(glm::vec3 position, float yaw, float pitch) {
     Position = position;
     targetVelocity = glm::vec3(0.0f);
@@ -94,7 +86,6 @@ void Camera::Reset(glm::vec3 position, float yaw, float pitch) {
     updateCameraVectors();
 }
 
-// Cập nhật các vector hướng nhìn Front, Right, Up
 void Camera::updateCameraVectors() {
     glm::vec3 front;
     front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));

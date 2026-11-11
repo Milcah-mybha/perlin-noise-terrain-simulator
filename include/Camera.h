@@ -1,4 +1,3 @@
-// Định nghĩa lớp Camera điều khiển góc nhìn 3D
 #ifndef CAMERA_H
 #define CAMERA_H
 
@@ -37,30 +36,23 @@ public:
     float mouseDamping;
     bool isSprint;
 
-    // Khởi tạo camera
     Camera(glm::vec3 position = glm::vec3(0.0f, 45.0f, 125.0f),
            glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
            float yaw = -90.0f,
            float pitch = -25.0f);
 
-    // Lấy ma trận quan sát View Matrix
     glm::mat4 GetViewMatrix() const;
 
-    // Xử lý di chuyển bàn phím
     void ProcessKeyboard(Camera_Movement direction);
 
-    // Xử lý xoay góc nhìn chuột
     void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
 
-    // Xử lý cuộn chuột zoom FOV
     void ProcessMouseScroll(float yoffset);
 
     void SetSprint(bool enable) { isSprint = enable; }
 
-    // Cập nhật tọa độ mượt mà mỗi frame
     void Update(float deltaTime);
 
-    // Đặt lại góc nhìn mặc định
     void Reset(glm::vec3 position, float yaw = -90.0f, float pitch = -25.0f);
 
 private:

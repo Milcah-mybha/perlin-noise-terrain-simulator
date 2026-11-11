@@ -1,4 +1,3 @@
-// Backend kết nối cửa sổ và chuột bàn phím GLFW cho Dear ImGui
 #include "imgui.h"
 #ifndef IMGUI_DISABLE
 #include "imgui_impl_glfw.h"
