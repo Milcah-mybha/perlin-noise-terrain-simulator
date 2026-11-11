@@ -32,7 +32,8 @@ Camera camera(DEFAULT_CAM_POS, glm::vec3(0.0f, 1.0f, 0.0f), DEFAULT_YAW, DEFAULT
 float lastX = 1366 / 2.0f;
 float lastY = 768 / 2.0f;
 bool firstMouse = true;
-bool mouseCaptured = false;
+bool isDraggingCamera = false; // Đang nhấn giữ chuột để xoay camera
+bool fpsMode = false;          // Chế độ khóa chuột liên tục kiểu game FPS
 
 // Quản lý thời gian
 float deltaTime = 0.0f;
@@ -258,14 +259,10 @@ int main() {
 
             ImGui::Begin("BẢNG ĐIỀU KHIỂN ĐỊA HÌNH", nullptr, ImGuiWindowFlags_None);
 
-            if (mouseCaptured) {
-                ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.5f, 1.0f), ">>> ĐANG XOAY CAMERA (Nhấn Chuột Phải để mở chuột) <<<");
+            if (fpsMode) {
+                ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), ">>> ĐANG KHÓA CHUỘT FPS (Nhấn F hoặc ESC để mở chuột) <<<");
             } else {
-                if (ImGui::Button("BẬT XOAY CAMERA 360 ĐỘ (Chuột Phải)", ImVec2(-1, 30))) {
-                    mouseCaptured = true;
-                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                    firstMouse = true;
-                }
+                ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.6f, 1.0f), "Kéo giữ Chuột để xoay camera | Buông để bấm nút");
             }
             ImGui::Separator();
 
@@ -350,15 +347,17 @@ int main() {
             ImGui::Spacing();
             ImGui::Separator();
 
-            // --- MỤC 4: HƯỚNG DẪN ĐIỀU KHIỂN ---
-            ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.6f, 1.0f), "Phím tắt điều khiển:");
-            ImGui::BulletText("Nhấn Chuột Phải: Bật/Tắt xoay camera 360");
+            // --- MỤC 4: HƯỚNG DẪN THAO TÁC ---
+            ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.6f, 1.0f), "Thao tác chuột & bàn phím:");
+            ImGui::BulletText("Nhấn giữ Chuột (Trái/Phải): Rê để xoay 360°");
+            ImGui::BulletText("Buông chuột: Chuột tự do bấm nút / thanh trượt");
             ImGui::BulletText("W, A, S, D: Lướt tới / lùi / trái / phải");
-            ImGui::BulletText("Space / Ctrl: Bay lên / Hạ xuống");
+            ImGui::BulletText("Space / Ctrl: Bay lên cao / Hạ xuống thấp");
             ImGui::BulletText("Giữ Shift: Tăng tốc bay nhanh (Turbo x2.3)");
             ImGui::BulletText("Cuộn chuột: Thu phóng mượt tầm nhìn (FoV Zoom)");
-            ImGui::BulletText("Phím H: Ẩn/Hiện bảng điều khiển");
-            ImGui::BulletText("Phím R: Đặt lại góc nhìn trên cao");
+            ImGui::BulletText("Phím F: Khóa/Mở chuột liên tục kiểu Game FPS");
+            ImGui::BulletText("Phím H: Ẩn/Hiện nhanh bảng điều khiển");
+            ImGui::BulletText("Phím R: Đặt lại góc nhìn toàn cảnh");
 
             ImGui::End();
         }
@@ -381,8 +380,8 @@ int main() {
 
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-        if (mouseCaptured) {
-            mouseCaptured = false;
+        if (fpsMode) {
+            fpsMode = false;
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
         } else {
             glfwSetWindowShouldClose(window, true);
@@ -404,6 +403,16 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
         camera.ProcessKeyboard(DOWN);
 
+    // Phím F: Bật/Tắt chế độ khóa chuột liên tục (FPS Mode)
+    static bool fPressed = false;
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fPressed) {
+        fpsMode = !fpsMode;
+        glfwSetInputMode(window, GLFW_CURSOR, fpsMode ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+        firstMouse = true;
+        fPressed = true;
+    }
+    if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) fPressed = false;
+
     // Phím H: Ẩn/Hiện bảng điều khiển
     static bool hPressed = false;
     if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS && !hPressed) {
@@ -420,16 +429,6 @@ void processInput(GLFWwindow* window) {
     }
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE) rPressed = false;
 
-    // Phím M: Bật/tắt xoay chuột
-    static bool mPressed = false;
-    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && !mPressed) {
-        mouseCaptured = !mouseCaptured;
-        glfwSetInputMode(window, GLFW_CURSOR, mouseCaptured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-        firstMouse = true;
-        mPressed = true;
-    }
-    if (glfwGetKey(window, GLFW_KEY_M) == GLFW_RELEASE) mPressed = false;
-
     // Phím Tab: Bật/tắt chế độ khung dây
     static bool tabPressed = false;
     if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS && !tabPressed) {
@@ -442,23 +441,24 @@ void processInput(GLFWwindow* window) {
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     ImGuiIO& io = ImGui::GetIO();
 
-    if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
-        mouseCaptured = !mouseCaptured;
-        glfwSetInputMode(window, GLFW_CURSOR, mouseCaptured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
-        firstMouse = true;
+    // Nếu nhấp chuột trên bảng điều khiển ImGui, để ImGui xử lý tương tác
+    if (io.WantCaptureMouse) {
+        isDraggingCamera = false;
+        return;
     }
-    else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        if (!io.WantCaptureMouse && !mouseCaptured) {
-            mouseCaptured = true;
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+    // Nhấn giữ Chuột Phải HOẶC Chuột Trái (bên ngoài UI) để kéo xoay camera
+    if (button == GLFW_MOUSE_BUTTON_LEFT || button == GLFW_MOUSE_BUTTON_RIGHT) {
+        if (action == GLFW_PRESS) {
+            isDraggingCamera = true;
             firstMouse = true;
+        } else if (action == GLFW_RELEASE) {
+            isDraggingCamera = false;
         }
     }
 }
 
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
-    if (!mouseCaptured) return;
-
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
 
@@ -474,7 +474,10 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     lastX = xpos;
     lastY = ypos;
 
-    camera.ProcessMouseMovement(xoffset, yoffset);
+    // Xoay camera mượt mà khi đang nhấn giữ chuột HOẶC khi bật FPS Mode
+    if (isDraggingCamera || fpsMode) {
+        camera.ProcessMouseMovement(xoffset, yoffset);
+    }
 }
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
