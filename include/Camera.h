@@ -1,3 +1,4 @@
+// Định nghĩa lớp Camera điều khiển góc nhìn 3D
 #ifndef CAMERA_H
 #define CAMERA_H
 

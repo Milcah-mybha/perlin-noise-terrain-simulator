@@ -1,3 +1,4 @@
+// Điều khiển camera quan sát 3D (xoay, di chuyển, zoom mượt)
 #include "Camera.h"
 #include <cmath>
 #include <algorithm>

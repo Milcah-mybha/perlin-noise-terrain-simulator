@@ -1,3 +1,4 @@
+// Thuật toán sinh nhiễu Perlin Noise và các biến thể địa hình (fBm, Ridged, Quần đảo)
 #include "PerlinNoise.h"
 #include <numeric>
 #include <random>

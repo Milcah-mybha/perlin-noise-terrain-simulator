@@ -1,3 +1,4 @@
+// Khởi tạo lưới đa giác, sinh độ cao địa hình 3D và chân vách chìm
 #include "Terrain.h"
 #include <cmath>
 #include <algorithm>

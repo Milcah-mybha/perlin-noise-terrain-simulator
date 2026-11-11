@@ -1,3 +1,4 @@
+// Quản lý nạp, biên dịch và truyền tham số cho Shader GLSL
 #include "Shader.h"
 #include <fstream>
 #include <sstream>

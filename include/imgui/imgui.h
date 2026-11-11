@@ -1,3 +1,4 @@
+// Khai báo giao diện người dùng Dear ImGui
 #pragma once
 
 #define IMGUI_VERSION       "1.93.1 WIP"

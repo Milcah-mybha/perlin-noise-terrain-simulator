@@ -1,3 +1,4 @@
+// Các thành phần giao diện (nút bấm, thanh trượt, checkbox) cho Dear ImGui
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif

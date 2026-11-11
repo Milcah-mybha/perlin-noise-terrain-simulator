@@ -1,3 +1,4 @@
+// Định nghĩa lớp Water quản lý mặt phẳng nước và sóng biển
 #ifndef WATER_H
 #define WATER_H
 

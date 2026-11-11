@@ -1,3 +1,4 @@
+// Định nghĩa lớp Terrain quản lý dữ liệu đỉnh và hiển thị địa hình
 #ifndef TERRAIN_H
 #define TERRAIN_H
 

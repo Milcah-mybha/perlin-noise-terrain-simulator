@@ -1,3 +1,4 @@
+// Định nghĩa lớp thuật toán Perlin Noise và các hàm toán học sinh địa hình
 #ifndef PERLIN_NOISE_H
 #define PERLIN_NOISE_H
 

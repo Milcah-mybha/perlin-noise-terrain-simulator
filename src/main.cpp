@@ -1,10 +1,10 @@
+// Điểm khởi chạy chương trình, quản lý vòng lặp và giao diện người dùng
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <iostream>
-#include <iomanip>
 #include <random>
 #include <string>
 

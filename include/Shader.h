@@ -1,3 +1,4 @@
+// Định nghĩa lớp Shader nạp và kích hoạt GLSL
 #ifndef SHADER_H
 #define SHADER_H
 

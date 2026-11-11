@@ -1,3 +1,4 @@
+// Dựng lưới mặt nước và hiệu ứng sóng biển đại dương
 #include "Water.h"
 
 Water::Water(float s, float h) : waterHeight(h), size(s), VAO(0), VBO(0), EBO(0), indexCount(0) {
