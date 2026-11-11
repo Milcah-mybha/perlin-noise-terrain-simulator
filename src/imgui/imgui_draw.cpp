@@ -1,30 +1,3 @@
-// dear imgui, v1.93.1 WIP
-// (drawing and font code)
-
-/*
-
-Index of this file:
-
-// [SECTION] STB libraries implementation
-// [SECTION] Style functions
-// [SECTION] ImDrawList
-// [SECTION] ImTriangulator, ImDrawList concave polygon fill
-// [SECTION] ImDrawListSplitter
-// [SECTION] ImDrawData
-// [SECTION] Helpers ShadeVertsXXX functions
-// [SECTION] ImFontConfig
-// [SECTION] ImFontAtlas, ImFontAtlasBuilder
-// [SECTION] ImFontAtlas: backend for stb_truetype
-// [SECTION] ImFontAtlas: glyph ranges helpers
-// [SECTION] ImFontGlyphRangesBuilder
-// [SECTION] ImFontBaked, ImFont
-// [SECTION] ImGui Internal Render Helpers
-// [SECTION] Decompression code
-// [SECTION] Default font data (ProggyClean.ttf)
-// [SECTION] Default font data (ProggyForever.ttf)
-
-*/
-
 #if defined(_MSC_VER) && !defined(_CRT_SECURE_NO_WARNINGS)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
