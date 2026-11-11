@@ -4,6 +4,9 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/include",
+                "${workspaceFolder}/include/imgui",
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/src/**",
                 "/usr/include",
                 "/usr/local/include"
             ],
