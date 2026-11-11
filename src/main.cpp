@@ -22,14 +22,17 @@
 const unsigned int SCR_WIDTH = 1366;
 const unsigned int SCR_HEIGHT = 768;
 
-// Vị trí mặc định Camera
-const glm::vec3 DEFAULT_CAM_POS(0.0f, 45.0f, 125.0f);
-Camera camera(DEFAULT_CAM_POS);
+// VỊ TRÍ XUẤT HIỆN TRÊN CAO (GÓC NHÌN TOÀN CẢNH ĐỂ QUAN SÁT CẢ MAP ĐỊA HÌNH VÀ NƯỚC)
+const glm::vec3 DEFAULT_CAM_POS(0.0f, 105.0f, 150.0f);
+const float DEFAULT_YAW   = -90.0f;
+const float DEFAULT_PITCH = -32.0f;
+
+Camera camera(DEFAULT_CAM_POS, glm::vec3(0.0f, 1.0f, 0.0f), DEFAULT_YAW, DEFAULT_PITCH);
 
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
-bool mouseCaptured = false; // Bật/tắt khóa chuột xoay góc nhìn 360 độ
+bool mouseCaptured = false;
 
 // Quản lý thời gian
 float deltaTime = 0.0f;
@@ -113,7 +116,7 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    // 6. Shader & Đối tượng
+    // 6. Shader & Đối tượng 3D
     Shader terrainShader("shaders/terrain.vert", "shaders/terrain.frag");
     Shader waterShader("shaders/water.vert", "shaders/water.frag");
 
@@ -121,9 +124,10 @@ int main() {
     Terrain terrain(220, 220, 1.0f);
     terrain.generate(perlin);
 
-    Water water(240.0f, 6.0f);
+    // Mặt nước tự nhiên bao quanh
+    Water water(300.0f, 5.5f);
 
-    glm::vec3 skyColor(0.66f, 0.78f, 0.90f);
+    glm::vec3 skyColor(0.66f, 0.79f, 0.92f);
 
     // 7. Vòng lặp render chính
     while (!glfwWindowShouldClose(window)) {
@@ -131,7 +135,6 @@ int main() {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        // Giới hạn deltaTime tránh hiện tượng nhảy khung hình đột ngột khi kéo cửa sổ
         if (deltaTime > 0.1f) deltaTime = 0.1f;
 
         // Xử lý phím bấm & Cập nhật Camera mượt mà với quán tính lướt
@@ -183,8 +186,8 @@ int main() {
 
         terrainShader.setBool("uFogEnabled", fogEnabled);
         terrainShader.setVec3("uFogColor", skyColor);
-        terrainShader.setFloat("uFogStart", 70.0f);
-        terrainShader.setFloat("uFogEnd", 280.0f);
+        terrainShader.setFloat("uFogStart", 80.0f);
+        terrainShader.setFloat("uFogEnd", 320.0f);
 
         terrain.draw(terrainShader);
 
@@ -202,8 +205,8 @@ int main() {
 
             waterShader.setBool("uFogEnabled", fogEnabled);
             waterShader.setVec3("uFogColor", skyColor);
-            waterShader.setFloat("uFogStart", 70.0f);
-            waterShader.setFloat("uFogEnd", 280.0f);
+            waterShader.setFloat("uFogStart", 80.0f);
+            waterShader.setFloat("uFogEnd", 320.0f);
 
             water.draw(waterShader, currentFrame);
         }
@@ -238,7 +241,6 @@ int main() {
 
         ImGui::Begin("BẢNG ĐIỀU KHIỂN ĐỊA HÌNH", nullptr, ImGuiWindowFlags_None);
 
-        // Nút chuyển nhanh chế độ Chuột
         if (mouseCaptured) {
             ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.5f, 1.0f), ">>> ĐANG XOAY CAMERA (Nhấn Chuột Phải để mở chuột) <<<");
         } else {
@@ -296,8 +298,8 @@ int main() {
             terrain.generate(perlin);
         }
 
-        if (ImGui::Button("Đặt lại góc nhìn Camera (Reset view)", ImVec2(-1, 28))) {
-            camera.Reset(DEFAULT_CAM_POS);
+        if (ImGui::Button("Đặt lại góc nhìn trên cao (Reset View)", ImVec2(-1, 28))) {
+            camera.Reset(DEFAULT_CAM_POS, DEFAULT_YAW, DEFAULT_PITCH);
         }
 
         ImGui::Spacing();
@@ -419,13 +421,11 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     ImGuiIO& io = ImGui::GetIO();
 
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_PRESS) {
-        // Nhấp chuột phải -> Bật/Tắt khóa chuột xoay camera
         mouseCaptured = !mouseCaptured;
         glfwSetInputMode(window, GLFW_CURSOR, mouseCaptured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
         firstMouse = true;
     }
     else if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
-        // Nếu nhấp chuột trái vào vùng 3D (không bấm trúng cửa sổ ImGui) -> Bật xoay camera
         if (!io.WantCaptureMouse && !mouseCaptured) {
             mouseCaptured = true;
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);

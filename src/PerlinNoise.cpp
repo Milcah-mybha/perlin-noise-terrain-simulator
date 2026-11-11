@@ -104,10 +104,21 @@ float PerlinNoise::terraced2D(float x, float y, int octaves, float steps) const 
     return (std::floor(h * steps) + smoothFrac * 0.35f) / steps;
 }
 
+// Thuật toán sinh đảo thực tế (Realistic Procedural Island):
+// Đường bờ biển được biến dạng bằng nhiễu ngẫu nhiên tạo các vịnh, bán đảo và bãi cát tự nhiên
 float PerlinNoise::island2D(float x, float y, float normalizedDist, int octaves) const {
-    float baseH = fbm2D(x, y, octaves, 0.5f, 2.0f);
-    float islandShape = std::max(0.0f, 1.0f - normalizedDist * 1.35f);
-    islandShape = islandShape * islandShape;
-    float finalH = islandShape * 0.75f + baseH * 0.35f;
+    // 1. Địa hình núi đồi cơ sở
+    float baseH = fbm2D(x, y, octaves, 0.48f, 2.0f);
+
+    // 2. Làm biến dạng khoảng cách để đường bờ biển uốn lượn có eo vịnh tự nhiên (không tròn cứng)
+    float coastWarp = noise2D(x * 0.7f + 2.3f, y * 0.7f + 1.7f) * 0.20f;
+    float d = normalizedDist + coastWarp;
+
+    // 3. Mặt nạ đảo mượt mà: trung tâm giữ nguyên núi non, ra xa thoải dần xuống mặt nước
+    float mask = 1.0f - std::clamp((d - 0.20f) / 0.65f, 0.0f, 1.0f);
+    mask = mask * mask * (3.0f - 2.0f * mask); // Smoothstep curve
+
+    // 4. Kết hợp độ cao với mặt nạ đảo
+    float finalH = (baseH * 1.12f - 0.12f) * mask;
     return std::clamp(finalH, 0.0f, 1.0f);
 }

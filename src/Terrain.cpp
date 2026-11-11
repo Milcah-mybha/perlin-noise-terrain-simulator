@@ -46,12 +46,12 @@ void Terrain::applyPreset(PresetType preset, PerlinNoise& noise) {
             redistribution = 1.15f;
             break;
         case PRESET_ISLANDS:
-            octaves = 5;
-            noiseScale = 0.015f;
-            heightScale = 28.0f;
-            persistence = 0.45f;
+            octaves = 6;
+            noiseScale = 0.013f;
+            heightScale = 35.0f;
+            persistence = 0.48f;
             lacunarity = 2.0f;
-            redistribution = 1.4f;
+            redistribution = 1.30f;
             break;
         case PRESET_SINGLE_OCTAVE:
             octaves = 1;
@@ -91,7 +91,8 @@ void Terrain::generate(PerlinNoise& noise) {
     minHeight = 1e9f;
     maxHeight = -1e9f;
 
-    float maxRadius = std::sqrt(std::pow(gridWidth * 0.5f, 2.0f) + std::pow(gridHeight * 0.5f, 2.0f));
+    float halfW = (gridWidth - 1) * 0.5f;
+    float halfH = (gridHeight - 1) * 0.5f;
 
     // 1. Tính toán bản đồ độ cao (Height Map)
     for (int z = 0; z < gridHeight; ++z) {
@@ -106,12 +107,18 @@ void Terrain::generate(PerlinNoise& noise) {
                 rawHeight = std::pow(rawHeight, redistribution);
             }
             else if (currentPreset == PRESET_ISLANDS) {
-                float distFromCenter = std::sqrt(std::pow(x - gridWidth * 0.5f, 2.0f) + std::pow(z - gridHeight * 0.5f, 2.0f));
-                float normDist = distFromCenter / maxRadius;
+                // Tính khoảng cách chuẩn hóa từ tâm đảo ra mép
+                float dx = (x - halfW) / halfW;
+                float dz = (z - halfH) / halfH;
+                float normDist = std::sqrt(dx * dx + dz * dz);
                 rawHeight = noise.island2D(sampleX, sampleZ, normDist, octaves);
+                rawHeight = std::pow(rawHeight, redistribution);
             }
             else if (currentPreset == PRESET_TERRACED) {
                 rawHeight = noise.terraced2D(sampleX, sampleZ, octaves, 8.0f);
+            }
+            else if (currentPreset == PRESET_SINGLE_OCTAVE) {
+                rawHeight = (noise.noise2D(sampleX, sampleZ) + 1.0f) * 0.5f;
             }
             else {
                 rawHeight = noise.fbm2D(sampleX, sampleZ, octaves, persistence, lacunarity);
