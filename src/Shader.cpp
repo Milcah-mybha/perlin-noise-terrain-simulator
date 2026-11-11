@@ -1,9 +1,15 @@
+/**
+ * @file Shader.cpp
+ * @brief Hiện thực đọc tệp, biên dịch Vertex/Fragment Shader và thiết lập các biến Uniform.
+ */
+
 #include "Shader.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 
+// === 1. ĐỌC TỆP VÀ BIÊN DỊCH SHADER PROGRAM ===
 Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     std::string vertexCode;
     std::string fragmentCode;
@@ -28,32 +34,28 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath) {
         fragmentCode = fShaderStream.str();
     }
     catch (std::ifstream::failure& e) {
-        std::cerr << "[LỖI SHADER] Không đọc được file shader: " << vertexPath << " hoặc " << fragmentPath << std::endl;
+        std::cerr << "[LỖI SHADER] Không đọc được tệp: " << vertexPath << " hoặc " << fragmentPath << std::endl;
     }
 
     const char* vShaderCode = vertexCode.c_str();
     const char* fShaderCode = fragmentCode.c_str();
 
-    // 1. Biên dịch Vertex Shader
     unsigned int vertex = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex, 1, &vShaderCode, NULL);
     glCompileShader(vertex);
     checkCompileErrors(vertex, "VERTEX");
 
-    // 2. Biên dịch Fragment Shader
     unsigned int fragment = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment, 1, &fShaderCode, NULL);
     glCompileShader(fragment);
     checkCompileErrors(fragment, "FRAGMENT");
 
-    // 3. Liên kết Shader Program
     ID = glCreateProgram();
     glAttachShader(ID, vertex);
     glAttachShader(ID, fragment);
     glLinkProgram(ID);
     checkCompileErrors(ID, "PROGRAM");
 
-    // Giải phóng bộ nhớ shader sau khi đã link vào program
     glDeleteShader(vertex);
     glDeleteShader(fragment);
 }
@@ -66,6 +68,7 @@ void Shader::use() const {
     glUseProgram(ID);
 }
 
+// === 2. CÁC HÀM TRUYỀN UNIFORM ===
 void Shader::setBool(const std::string& name, bool value) const {
     glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
 }
@@ -90,6 +93,7 @@ void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
     glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
+// === 3. KIỂM TRA LỖI BIÊN DỊCH SHADER ===
 void Shader::checkCompileErrors(unsigned int shader, const std::string& type) {
     int success;
     char infoLog[1024];
@@ -97,13 +101,13 @@ void Shader::checkCompileErrors(unsigned int shader, const std::string& type) {
         glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
         if (!success) {
             glGetShaderInfoLog(shader, 1024, NULL, infoLog);
-            std::cerr << "[LỖI SHADER BIÊN DỊCH LOẠI: " << type << "]\n" << infoLog << std::endl;
+            std::cerr << "[LỖI SHADER BIÊN DỊCH: " << type << "]\n" << infoLog << std::endl;
         }
     } else {
         glGetProgramiv(shader, GL_LINK_STATUS, &success);
         if (!success) {
             glGetProgramInfoLog(shader, 1024, NULL, infoLog);
-            std::cerr << "[LỖI SHADER LIÊN KẾT PROGRAM]\n" << infoLog << std::endl;
+            std::cerr << "[LỖI SHADER LIÊN KẾT: " << type << "]\n" << infoLog << std::endl;
         }
     }
 }

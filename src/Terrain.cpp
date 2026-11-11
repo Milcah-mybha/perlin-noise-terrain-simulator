@@ -1,5 +1,9 @@
+/**
+ * @file Terrain.cpp
+ * @brief Hiện thực sinh lưới địa hình 3D từ thuật toán Perlin Noise, tính toán pháp tuyến và tạo vách chân địa tầng.
+ */
+
 #include "Terrain.h"
-#include <iostream>
 #include <cmath>
 #include <algorithm>
 
@@ -15,7 +19,6 @@ Terrain::Terrain(int resolution, float size)
       waterLevel(0.44f),
       VAO(0), VBO(0), EBO(0), indexCount(0),
       skirtVAO(0), skirtVBO(0), skirtEBO(0), skirtIndexCount(0),
-      trayVAO(0), trayVBO(0), trayEBO(0), trayIndexCount(0),
       minHeight(0.0f), maxHeight(30.0f) {
 }
 
@@ -27,17 +30,13 @@ Terrain::~Terrain() {
     if (skirtVAO != 0) glDeleteVertexArrays(1, &skirtVAO);
     if (skirtVBO != 0) glDeleteBuffers(1, &skirtVBO);
     if (skirtEBO != 0) glDeleteBuffers(1, &skirtEBO);
-
-    if (trayVAO != 0) glDeleteVertexArrays(1, &trayVAO);
-    if (trayVBO != 0) glDeleteBuffers(1, &trayVBO);
-    if (trayEBO != 0) glDeleteBuffers(1, &trayEBO);
 }
 
+// === 1. THIẾT LẬP CÁC DẠNG ĐỊA HÌNH MẪU (PRESETS) ===
 void Terrain::applyPreset(PresetType preset, PerlinNoise& noise) {
     currentPreset = preset;
     switch (preset) {
         case PRESET_ISLANDS:
-            // 1. Quần đảo tự nhiên (Natural Archipelago)
             freq = 2.4f;
             octaves = 6;
             lacunarity = 2.1f;
@@ -46,7 +45,6 @@ void Terrain::applyPreset(PresetType preset, PerlinNoise& noise) {
             waterLevel = 0.44f;
             break;
         case PRESET_ROLLING_HILLS:
-            // 2. Đồi núi thoai thoải (Rolling Hills)
             freq = 2.0f;
             octaves = 5;
             lacunarity = 2.0f;
@@ -55,7 +53,6 @@ void Terrain::applyPreset(PresetType preset, PerlinNoise& noise) {
             waterLevel = 0.22f;
             break;
         case PRESET_ALPINE_RIDGES:
-            // 3. Dãy núi tuyết hùng vĩ (Snowy Peaks)
             freq = 3.0f;
             octaves = 7;
             lacunarity = 2.1f;
@@ -64,7 +61,6 @@ void Terrain::applyPreset(PresetType preset, PerlinNoise& noise) {
             waterLevel = 0.20f;
             break;
         case PRESET_TERRACED:
-            // 4. Hẻm núi bậc thang (Terraced Canyon)
             freq = 2.2f;
             octaves = 6;
             lacunarity = 2.0f;
@@ -73,7 +69,6 @@ void Terrain::applyPreset(PresetType preset, PerlinNoise& noise) {
             waterLevel = 0.28f;
             break;
         case PRESET_VOLCANO:
-            // 5. Miệng núi lửa sâu (Volcano Crater)
             freq = 2.8f;
             octaves = 6;
             lacunarity = 2.0f;
@@ -82,7 +77,6 @@ void Terrain::applyPreset(PresetType preset, PerlinNoise& noise) {
             waterLevel = 0.35f;
             break;
         case PRESET_SINGLE_OCTAVE:
-            // 6. Sóng địa hình đơn giản (Single Wave)
             freq = 2.5f;
             octaves = 1;
             lacunarity = 2.0f;
@@ -94,6 +88,7 @@ void Terrain::applyPreset(PresetType preset, PerlinNoise& noise) {
     generate(noise);
 }
 
+// === 2. TÍNH TOÁN BẢN ĐỒ ĐỘ CAO VÀ ĐỈNH LƯỚI 3D ===
 void Terrain::generate(PerlinNoise& noise) {
     vertices.clear();
     indices.clear();
@@ -106,7 +101,6 @@ void Terrain::generate(PerlinNoise& noise) {
     minHeight = 1e9f;
     maxHeight = -1e9f;
 
-    // 1. Tính toán bản đồ độ cao theo thuật toán toán học Perlin Noise
     for (int j = 0; j < n; ++j) {
         for (int i = 0; i < n; ++i) {
             float u = static_cast<float>(i) / (n - 1);
@@ -122,33 +116,21 @@ void Terrain::generate(PerlinNoise& noise) {
             float t = 0.0f;
 
             if (currentPreset == PRESET_ISLANDS) {
-                // Quần đảo tự nhiên: suy giảm tự nhiên về phía biển lớn
-                float edgePerturb = noise.noise2D(sampleX * 1.5f, sampleZ * 1.5f) * 0.22f;
-                float d = distFromCenter + edgePerturb;
-                float islandFalloff = std::clamp(1.0f - (d - 0.35f) / (0.85f - 0.35f), 0.0f, 1.0f);
-                islandFalloff = islandFalloff * islandFalloff * (3.0f - 2.0f * islandFalloff); // smoothstep
-
-                float fbm = noise.fbm2D(sampleX, sampleZ, octaves, persistence, lacunarity);
-                t = (fbm * 0.70f + 0.30f) * islandFalloff;
+                t = noise.island2D(sampleX, sampleZ, distFromCenter, octaves, persistence, lacunarity);
             } else if (currentPreset == PRESET_VOLCANO) {
-                // Miệng núi lửa: hình nón với lòng chảo hõm ở giữa
                 float cone = std::clamp(1.0f - distFromCenter * 1.25f, 0.0f, 1.0f);
                 float crater = std::clamp((0.24f - distFromCenter) * 4.2f, 0.0f, 1.0f);
                 float volcano = std::max(0.0f, cone - crater * 0.75f);
                 float fbm = noise.fbm2D(sampleX, sampleZ, octaves, persistence, lacunarity);
                 t = std::clamp(volcano * 0.82f + (fbm - 0.5f) * 0.32f, 0.0f, 1.0f);
             } else if (currentPreset == PRESET_ALPINE_RIDGES) {
-                // Dãy núi tuyết nhọn: Ridged Multifractal
                 float ridged = noise.ridged2D(sampleX, sampleZ, octaves, persistence, lacunarity);
                 t = std::clamp(ridged * 1.05f, 0.0f, 1.0f);
             } else if (currentPreset == PRESET_TERRACED) {
-                // Hẻm núi bậc thang trầm tích
                 t = noise.terraced2D(sampleX, sampleZ, octaves, 8.0f);
             } else if (currentPreset == PRESET_SINGLE_OCTAVE) {
-                // Sóng đơn tầng mượt mà
                 t = (noise.noise2D(sampleX, sampleZ) + 1.0f) * 0.5f;
             } else {
-                // Đồi núi thoai thoải fBm
                 t = noise.fbm2D(sampleX, sampleZ, octaves, persistence, lacunarity);
             }
 
@@ -167,7 +149,7 @@ void Terrain::generate(PerlinNoise& noise) {
     float halfSize = worldSize * 0.5f;
     float step = worldSize / (n - 1);
 
-    // 2. Tạo đỉnh và tính Vector pháp tuyến (Normals) bằng sai phân trung tâm
+    // === 3. TÍNH PHÁP TUYẾN BẰNG PHƯƠNG PHÁP SAI PHÂN TRUNG TÂM (CENTRAL DIFFERENCES) ===
     for (int j = 0; j < n; ++j) {
         for (int i = 0; i < n; ++i) {
             int idx = j * n + i;
@@ -188,9 +170,7 @@ void Terrain::generate(PerlinNoise& noise) {
             float hU = heightMap[upJ * n + i];
 
             float dx = (rightI - leftI) * step;
-            float dz = (upJ - downJ) * step;
             if (dx < 0.001f) dx = step * 2.0f;
-            if (dz < 0.001f) dz = step * 2.0f;
 
             glm::vec3 normal = glm::normalize(glm::vec3(hL - hR, dx, hD - hU));
 
@@ -201,7 +181,6 @@ void Terrain::generate(PerlinNoise& noise) {
         }
     }
 
-    // 3. Tạo Index Buffer cho lưới tam giác (Triangulation)
     for (int j = 0; j < n - 1; ++j) {
         for (int i = 0; i < n - 1; ++i) {
             unsigned int topLeft     = j * n + i;
@@ -221,25 +200,23 @@ void Terrain::generate(PerlinNoise& noise) {
 
     indexCount = static_cast<int>(indices.size());
 
-    // 4. Dựng chân vách địa tầng bên dưới (Skirts)
     buildSkirt(heightMap);
-
-    // 5. Cấu hình VBO/VAO
     setupMesh();
 }
 
+// === 4. TẠO VÁCH ĐỊA TẦNG TRẦM TÍCH BÊN DƯỚI (SKIRT) ===
 void Terrain::buildSkirt(const std::vector<float>& heightMap) {
     skirtVertices.clear();
     skirtIndices.clear();
 
     int n = gridResolution;
-    float baseY = -6.0f; // Đáy thành địa tầng chìm dưới đáy biển sâu
+    float baseY = -6.0f;
 
     auto getIdx = [n](int edge, int i) -> int {
-        if (edge == 0) return 0 * n + i;           // Cạnh Bắc (Z âm)
-        if (edge == 1) return (n - 1) * n + i;     // Cạnh Nam (Z dương)
-        if (edge == 2) return i * n + 0;           // Cạnh Tây (X âm)
-        return i * n + (n - 1);                    // Cạnh Đông (X dương)
+        if (edge == 0) return 0 * n + i;
+        if (edge == 1) return (n - 1) * n + i;
+        if (edge == 2) return i * n + 0;
+        return i * n + (n - 1);
     };
 
     glm::vec3 normals[4] = {
@@ -260,7 +237,7 @@ void Terrain::buildSkirt(const std::vector<float>& heightMap) {
             vTop.Position = topPos;
             vTop.Normal = normals[e];
             vTop.TexCoords = glm::vec2(static_cast<float>(i) / (n - 1), 1.0f);
-            vTop.NormalizedHeight = -0.5f; // Đánh dấu tầng đất trầm tích
+            vTop.NormalizedHeight = -0.5f;
             skirtVertices.push_back(vTop);
 
             TerrainVertex vBot;
@@ -291,13 +268,6 @@ void Terrain::buildSkirt(const std::vector<float>& heightMap) {
     skirtIndexCount = static_cast<int>(skirtIndices.size());
 }
 
-void Terrain::buildTray() {
-    // Không cần dựng các khối phòng triển lãm hay sàn gỗ che tầm nhìn nữa
-    trayVertices.clear();
-    trayIndices.clear();
-    trayIndexCount = 0;
-}
-
 float Terrain::getLandPercentage() const {
     if (vertices.empty()) return 50.0f;
     int landCount = 0;
@@ -309,8 +279,8 @@ float Terrain::getLandPercentage() const {
     return (static_cast<float>(landCount) / vertices.size()) * 100.0f;
 }
 
+// === 5. CẤU HÌNH VBO/VAO CHO OPENGL ===
 void Terrain::setupMesh() {
-    // 1. VAO Bề mặt địa hình
     if (VAO == 0) {
         glGenVertexArrays(1, &VAO);
         glGenBuffers(1, &VBO);
@@ -332,7 +302,6 @@ void Terrain::setupMesh() {
     glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, sizeof(TerrainVertex), (void*)offsetof(TerrainVertex, NormalizedHeight));
     glBindVertexArray(0);
 
-    // 2. VAO Thành vách địa tầng (Skirt)
     if (skirtVAO == 0) {
         glGenVertexArrays(1, &skirtVAO);
         glGenBuffers(1, &skirtVBO);
@@ -355,14 +324,13 @@ void Terrain::setupMesh() {
     glBindVertexArray(0);
 }
 
+// === 6. VẼ ĐỊA HÌNH VÀ VÁCH ĐỊA TẦNG ===
 void Terrain::draw(const Shader& shader) const {
     if (VAO == 0 || indexCount == 0) return;
 
-    // Vẽ bề mặt địa hình tự nhiên
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 
-    // Vẽ thành vách địa tầng bên dưới
     if (skirtVAO != 0 && skirtIndexCount > 0) {
         glBindVertexArray(skirtVAO);
         glDrawElements(GL_TRIANGLES, skirtIndexCount, GL_UNSIGNED_INT, 0);

@@ -1,3 +1,8 @@
+/**
+ * @file Shader.h
+ * @brief Định nghĩa lớp Shader nạp mã nguồn GLSL từ tệp, biên dịch và truyền tham số Uniform vào GPU.
+ */
+
 #ifndef SHADER_H
 #define SHADER_H
 
@@ -14,7 +19,7 @@ public:
 
     void use() const;
 
-    // Thiết lập các biến Uniform
+    // === TRUYỀN DỮ LIỆU UNIFORM XUỐNG SHADER ===
     void setBool(const std::string& name, bool value) const;
     void setInt(const std::string& name, int value) const;
     void setFloat(const std::string& name, float value) const;

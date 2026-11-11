@@ -1,17 +1,22 @@
+/**
+ * @file Camera.cpp
+ * @brief Hiện thực lớp Camera 3D, tính toán vector hướng nhìn và thuật toán giảm chấn mượt mà (Exponential Damping).
+ */
+
 #include "Camera.h"
 #include <cmath>
 #include <algorithm>
 
 Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     : Front(glm::vec3(0.0f, 0.0f, -1.0f)),
-      MovementSpeed(SPEED),
-      MouseSensitivity(SENSITIVITY),
-      Zoom(ZOOM),
+      MovementSpeed(42.0f),
+      MouseSensitivity(0.09f),
+      Zoom(45.0f),
       targetVelocity(0.0f),
       currentVelocity(0.0f),
       targetYaw(yaw),
       targetPitch(pitch),
-      targetZoom(ZOOM),
+      targetZoom(45.0f),
       damping(10.0f),
       mouseDamping(22.0f),
       isSprint(false) {
@@ -26,24 +31,20 @@ glm::mat4 Camera::GetViewMatrix() const {
     return glm::lookAt(Position, Position + Front, Up);
 }
 
+// === 1. XỬ LÝ DI CHUYỂN BÀN PHÍM (WASD, SPACE, CTRL) ===
 void Camera::ProcessKeyboard(Camera_Movement direction) {
     float speedMultiplier = isSprint ? 2.3f : 1.0f;
     float currentSpeed = MovementSpeed * speedMultiplier;
 
-    if (direction == FORWARD)
-        targetVelocity += Front * currentSpeed;
-    if (direction == BACKWARD)
-        targetVelocity -= Front * currentSpeed;
-    if (direction == LEFT)
-        targetVelocity -= Right * currentSpeed;
-    if (direction == RIGHT)
-        targetVelocity += Right * currentSpeed;
-    if (direction == UP)
-        targetVelocity += WorldUp * currentSpeed;
-    if (direction == DOWN)
-        targetVelocity -= WorldUp * currentSpeed;
+    if (direction == FORWARD)  targetVelocity += Front * currentSpeed;
+    if (direction == BACKWARD) targetVelocity -= Front * currentSpeed;
+    if (direction == LEFT)     targetVelocity -= Right * currentSpeed;
+    if (direction == RIGHT)    targetVelocity += Right * currentSpeed;
+    if (direction == UP)       targetVelocity += WorldUp * currentSpeed;
+    if (direction == DOWN)     targetVelocity -= WorldUp * currentSpeed;
 }
 
+// === 2. XỬ LÝ XOAY GÓC NHÌN CHUỘT (YAW, PITCH) ===
 void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch) {
     xoffset *= MouseSensitivity;
     yoffset *= MouseSensitivity;
@@ -52,36 +53,29 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPi
     targetPitch += yoffset;
 
     if (constrainPitch) {
-        if (targetPitch > 89.0f)
-            targetPitch = 89.0f;
-        if (targetPitch < -89.0f)
-            targetPitch = -89.0f;
+        if (targetPitch > 89.0f)  targetPitch = 89.0f;
+        if (targetPitch < -89.0f) targetPitch = -89.0f;
     }
 }
 
+// === 3. XỬ LÝ THU PHÓNG TẦM NHÌN (FOV ZOOM) ===
 void Camera::ProcessMouseScroll(float yoffset) {
     targetZoom -= yoffset * 2.5f;
-    if (targetZoom < 15.0f)
-        targetZoom = 15.0f;
-    if (targetZoom > 65.0f)
-        targetZoom = 65.0f;
+    if (targetZoom < 15.0f) targetZoom = 15.0f;
+    if (targetZoom > 65.0f) targetZoom = 65.0f;
 }
 
+// === 4. CẬP NHẬT VÀ NỘI SUY MƯỢT MÀ TỪNG KHUNG HÌNH ===
 void Camera::Update(float deltaTime) {
-    // 1. Làm mịn vị trí di chuyển với gia tốc và quán tính lướt êm ái
     float moveBlend = 1.0f - std::exp(-damping * deltaTime);
     currentVelocity = glm::mix(currentVelocity, targetVelocity, moveBlend);
     Position += currentVelocity * deltaTime;
-
-    // Reset lực đẩy mục tiêu cho frame tiếp theo
     targetVelocity = glm::vec3(0.0f);
 
-    // 2. Làm mịn góc xoay chuột loại bỏ hoàn toàn vi giật (Micro-stutter)
     float rotBlend = 1.0f - std::exp(-mouseDamping * deltaTime);
     Yaw   = glm::mix(Yaw, targetYaw, rotBlend);
     Pitch = glm::mix(Pitch, targetPitch, rotBlend);
 
-    // 3. Làm mịn thu phóng tầm nhìn (FoV Zoom)
     float zoomBlend = 1.0f - std::exp(-15.0f * deltaTime);
     Zoom  = glm::mix(Zoom, targetZoom, zoomBlend);
 
@@ -96,18 +90,18 @@ void Camera::Reset(glm::vec3 position, float yaw, float pitch) {
     Pitch = pitch;
     targetYaw = yaw;
     targetPitch = pitch;
-    Zoom = ZOOM;
-    targetZoom = ZOOM;
+    Zoom = 45.0f;
+    targetZoom = 45.0f;
     updateCameraVectors();
 }
 
+// === 5. TÍNH TOÁN CÁC VECTOR KHÔNG GIAN 3D (FRONT, RIGHT, UP) ===
 void Camera::updateCameraVectors() {
     glm::vec3 front;
     front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));
     front.y = sin(glm::radians(Pitch));
     front.z = sin(glm::radians(Yaw)) * cos(glm::radians(Pitch));
     Front = glm::normalize(front);
-
     Right = glm::normalize(glm::cross(Front, WorldUp));
     Up    = glm::normalize(glm::cross(Right, Front));
 }

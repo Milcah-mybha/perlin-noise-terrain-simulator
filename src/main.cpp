@@ -1,3 +1,8 @@
+/**
+ * @file main.cpp
+ * @brief Điểm khởi đầu chương trình (Entry Point), cấu hình OpenGL, vòng lặp dựng hình chính và giao diện Dear ImGui.
+ */
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -18,11 +23,10 @@
 #include "Terrain.h"
 #include "Water.h"
 
-// Kích thước cửa sổ động (hỗ trợ chuyển đổi toàn màn hình mượt mà)
+// === 1. THIẾT LẬP THÔNG SỐ CỬA SỔ VÀ CAMERA ===
 int windowWidth = 1366;
 int windowHeight = 768;
 
-// Góc nhìn toàn cảnh từ trên cao nhìn bao quát toàn bộ quần đảo và biển
 const glm::vec3 DEFAULT_CAM_POS(0.0f, 85.0f, 135.0f);
 const float DEFAULT_YAW   = -90.0f;
 const float DEFAULT_PITCH = -30.0f;
@@ -32,23 +36,22 @@ Camera camera(DEFAULT_CAM_POS, glm::vec3(0.0f, 1.0f, 0.0f), DEFAULT_YAW, DEFAULT
 float lastX = 1366 / 2.0f;
 float lastY = 768 / 2.0f;
 bool firstMouse = true;
-bool isDraggingCamera = false; // Đang nhấn giữ chuột để xoay camera
-bool fpsMode = false;          // Chế độ khóa chuột liên tục kiểu game FPS
+bool isDraggingCamera = false;
+bool fpsMode = false;
 
-// Quản lý thời gian
+// === 2. THÔNG SỐ TRẠNG THÁI ỨNG DỤNG ===
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
-// Trạng thái ứng dụng
 bool wireframeMode = false;
-int colorMode = 0; // 0: Biomes tự nhiên, 1: Heatmap, 2: Grayscale
+int colorMode = 0; // 0: Biomes, 1: Heatmap, 2: Grayscale
 bool renderWater = true;
 bool rotateSun = true;
 float sunAngle = 45.0f;
 float sunSpeed = 6.0f;
-bool showControlPanel = true; // Trạng thái ẩn/hiện bảng điều khiển
+bool showControlPanel = true;
 
-// Callbacks
+// === 3. KHAI BÁO CÁC HÀM CALLBACK ===
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -57,7 +60,7 @@ void processInput(GLFWwindow* window);
 void setupImGuiTheme();
 
 int main() {
-    // 1. Khởi tạo GLFW
+    // === 4. KHỞI TẠO GLFW VÀ GLAD ===
     if (!glfwInit()) {
         std::cerr << "Lỗi: Không khởi tạo được GLFW!" << std::endl;
         return -1;
@@ -66,7 +69,6 @@ int main() {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    // 2. Tạo cửa sổ GLFW
     GLFWwindow* window = glfwCreateWindow(windowWidth, windowHeight, "Mô Phỏng Sinh Địa Hình 3D - Perlin Noise", NULL, NULL);
     if (!window) {
         std::cerr << "Lỗi: Không tạo được cửa sổ GLFW!" << std::endl;
@@ -79,18 +81,16 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
 
-    // 3. Nạp GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Lỗi: Không nạp được GLAD!" << std::endl;
         return -1;
     }
 
-    // 4. Cấu hình OpenGL
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // 5. Khởi tạo Dear ImGui & Phông chữ Tiếng Việt Unicode
+    // === 5. KHỞI TẠO DEAR IMGUI & PHÔNG CHỮ TIẾNG VIỆT UNICODE ===
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -117,22 +117,18 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    // 6. Shader & Đối tượng 3D
+    // === 6. TẢI SHADER VÀ KHỞI TẠO ĐỐI TƯỢNG 3D ===
     Shader terrainShader("shaders/terrain.vert", "shaders/terrain.frag");
     Shader waterShader("shaders/water.vert", "shaders/water.frag");
 
     PerlinNoise perlin(2026);
     Terrain terrain(180, 120.0f);
-    // Khởi tạo dạng Quần đảo tự nhiên (Natural Archipelago)
     terrain.applyPreset(PRESET_ISLANDS, perlin);
 
-    // Mặt nước biển bao la mở rộng ra xa (420m)
     Water water(420.0f, terrain.waterLevel * terrain.heightScale);
-
-    // Màu bầu trời trong xanh tự nhiên (Sky Blue Atmosphere)
     glm::vec3 skyColor(0.60f, 0.73f, 0.88f);
 
-    // 7. Vòng lặp render chính
+    // === 7. VÒNG LẶP DỰNG HÌNH CHÍNH (RENDER LOOP) ===
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
@@ -143,12 +139,10 @@ int main() {
         processInput(window);
         camera.Update(deltaTime);
 
-        // Khởi động Frame ImGui
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // Chu kỳ quay mặt trời
         if (rotateSun) {
             sunAngle += deltaTime * sunSpeed;
             if (sunAngle > 360.0f) sunAngle -= 360.0f;
@@ -156,17 +150,15 @@ int main() {
         float sunRad = glm::radians(sunAngle);
         glm::vec3 lightDir = glm::normalize(glm::vec3(cos(sunRad), -0.85f, sin(sunRad)));
 
-        // Xóa màn hình với màu bầu trời
         glClearColor(skyColor.r, skyColor.g, skyColor.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Cập nhật ma trận theo kích thước cửa sổ thực tế (tự động thích ứng toàn màn hình)
         float aspect = (windowHeight > 0) ? static_cast<float>(windowWidth) / static_cast<float>(windowHeight) : (16.0f / 9.0f);
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), aspect, 0.1f, 1200.0f);
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 model = glm::mat4(1.0f);
 
-        // ================= VẼ ĐỊA HÌNH 3D =================
+        // === 8. VẼ ĐỊA HÌNH 3D ===
         if (wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         } else {
@@ -188,7 +180,7 @@ int main() {
 
         terrain.draw(terrainShader);
 
-        // ================= VẼ MẶT NƯỚC ĐẠI DƯƠNG =================
+        // === 9. VẼ MẶT NƯỚC ĐẠI DƯƠNG ===
         if (renderWater && !wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             waterShader.use();
@@ -204,10 +196,10 @@ int main() {
             water.draw(waterShader, currentFrame);
         }
 
-        // ================= GIAO DIỆN ĐIỀU KHIỂN IMGUI (RESPONSIVE) =================
+        // === 10. DỰNG GIAO DIỆN DEAR IMGUI ===
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        // 1. Thẻ thông số nổi góc trên bên trái (Stats Card)
+        // Thẻ thông số nổi góc trên bên trái
         ImGui::SetNextWindowPos(ImVec2(16, 16), ImGuiCond_Always);
         ImGui::SetNextWindowBgAlpha(0.85f);
         ImGui::Begin("Thống Số##StatsCard", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove);
@@ -234,7 +226,7 @@ int main() {
         }
         ImGui::End();
 
-        // 2. Thanh nút tác vụ nhanh góc trên bên phải (Top Action Bar)
+        // Thanh nút tác vụ nhanh góc trên bên phải
         float topBarWidth = showControlPanel ? 360.0f : 240.0f;
         ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - topBarWidth - 16, 16), ImGuiCond_Always);
         ImGui::SetNextWindowBgAlpha(0.85f);
@@ -250,7 +242,7 @@ int main() {
         }
         ImGui::End();
 
-        // 3. Bảng điều khiển chính docked cạnh phải màn hình (tự co dãn theo toàn màn hình)
+        // Bảng điều khiển chính docked cạnh phải màn hình
         if (showControlPanel) {
             float panelWidth = 410.0f;
             ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - panelWidth - 16, 62), ImGuiCond_Always);
@@ -266,7 +258,6 @@ int main() {
             }
             ImGui::Separator();
 
-            // --- MỤC 1: CÁC DẠNG ĐỊA HÌNH MẪU (PRESETS) ---
             ImGui::TextColored(ImVec4(0.45f, 0.75f, 1.0f, 1.0f), "1. CÁC DẠNG ĐỊA HÌNH MẪU (PRESETS):");
             
             float btnW = 188.0f;
@@ -299,7 +290,6 @@ int main() {
             ImGui::Spacing();
             ImGui::Separator();
 
-            // --- MỤC 2: TÙY CHỈNH THÔNG SỐ NHIỄU (NOISE SETTINGS) ---
             ImGui::TextColored(ImVec4(0.45f, 0.75f, 1.0f, 1.0f), "2. TÙY CHỈNH THÔNG SỐ ĐỊA HÌNH:");
             
             bool needRegen = false;
@@ -312,7 +302,6 @@ int main() {
             needRegen |= ImGui::SliderFloat("Chiều cao núi", &terrain.heightScale, 10.0f, 60.0f, "%.1f m");
             
             if (ImGui::SliderFloat("Mực nước biển", &terrain.waterLevel, 0.05f, 0.85f, "%.2f")) {
-                // Mực nước biển cập nhật tức thì thời gian thực
             }
             ImGui::PopItemWidth();
 
@@ -329,7 +318,6 @@ int main() {
             ImGui::Spacing();
             ImGui::Separator();
 
-            // --- MỤC 3: CHẾ ĐỘ HIỂN THỊ (VIEW & ENVIRONMENT) ---
             ImGui::TextColored(ImVec4(0.45f, 0.75f, 1.0f, 1.0f), "3. CHẾ ĐỘ HIỂN THỊ & MÔI TRƯỜNG:");
             const char* viewOptions[] = {
                 "Địa hình tự nhiên (Biomes sinh thái)",
@@ -353,7 +341,6 @@ int main() {
             ImGui::Spacing();
             ImGui::Separator();
 
-            // --- MỤC 4: HƯỚNG DẪN THAO TÁC ---
             ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.6f, 1.0f), "Thao tác chuột & bàn phím:");
             ImGui::BulletText("Nhấn giữ Chuột (Trái/Phải): Rê để xoay 360°");
             ImGui::BulletText("Buông chuột: Chuột tự do bấm nút / thanh trượt");
@@ -368,7 +355,6 @@ int main() {
             ImGui::End();
         }
 
-        // Render ImGui
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -384,6 +370,7 @@ int main() {
     return 0;
 }
 
+// === 11. XỬ LÝ SỰ KIỆN ĐẦU VÀO PHÍM TẮT ===
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         if (fpsMode) {
@@ -396,20 +383,13 @@ void processInput(GLFWwindow* window) {
 
     camera.SetSprint(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS);
 
-    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-        camera.ProcessKeyboard(FORWARD);
-    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-        camera.ProcessKeyboard(BACKWARD);
-    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-        camera.ProcessKeyboard(LEFT);
-    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-        camera.ProcessKeyboard(RIGHT);
-    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        camera.ProcessKeyboard(UP);
-    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
-        camera.ProcessKeyboard(DOWN);
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) camera.ProcessKeyboard(FORWARD);
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) camera.ProcessKeyboard(BACKWARD);
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) camera.ProcessKeyboard(LEFT);
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) camera.ProcessKeyboard(RIGHT);
+    if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS) camera.ProcessKeyboard(UP);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) camera.ProcessKeyboard(DOWN);
 
-    // Phím F: Bật/Tắt chế độ khóa chuột liên tục (FPS Mode)
     static bool fPressed = false;
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS && !fPressed) {
         fpsMode = !fpsMode;
@@ -419,7 +399,6 @@ void processInput(GLFWwindow* window) {
     }
     if (glfwGetKey(window, GLFW_KEY_F) == GLFW_RELEASE) fPressed = false;
 
-    // Phím H: Ẩn/Hiện bảng điều khiển
     static bool hPressed = false;
     if (glfwGetKey(window, GLFW_KEY_H) == GLFW_PRESS && !hPressed) {
         showControlPanel = !showControlPanel;
@@ -427,7 +406,6 @@ void processInput(GLFWwindow* window) {
     }
     if (glfwGetKey(window, GLFW_KEY_H) == GLFW_RELEASE) hPressed = false;
 
-    // Phím R: Đặt lại góc nhìn trên cao
     static bool rPressed = false;
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS && !rPressed) {
         camera.Reset(DEFAULT_CAM_POS, DEFAULT_YAW, DEFAULT_PITCH);
@@ -435,7 +413,6 @@ void processInput(GLFWwindow* window) {
     }
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE) rPressed = false;
 
-    // Phím Tab: Bật/tắt chế độ khung dây
     static bool tabPressed = false;
     if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS && !tabPressed) {
         wireframeMode = !wireframeMode;
@@ -444,16 +421,15 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_RELEASE) tabPressed = false;
 }
 
+// === 12. XỬ LÝ SỰ KIỆN CHUỘT (CLICK & DRAG) ===
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     ImGuiIO& io = ImGui::GetIO();
 
-    // Nếu nhấp chuột trên bảng điều khiển ImGui, để ImGui xử lý tương tác
     if (io.WantCaptureMouse) {
         isDraggingCamera = false;
         return;
     }
 
-    // Nhấn giữ Chuột Phải HOẶC Chuột Trái (bên ngoài UI) để kéo xoay camera
     if (button == GLFW_MOUSE_BUTTON_LEFT || button == GLFW_MOUSE_BUTTON_RIGHT) {
         if (action == GLFW_PRESS) {
             isDraggingCamera = true;
@@ -480,7 +456,6 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     lastX = xpos;
     lastY = ypos;
 
-    // Xoay camera mượt mà khi đang nhấn giữ chuột HOẶC khi bật FPS Mode
     if (isDraggingCamera || fpsMode) {
         camera.ProcessMouseMovement(xoffset, yoffset);
     }
@@ -501,6 +476,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     }
 }
 
+// === 13. GIAO DIỆN THEME CHO DEAR IMGUI ===
 void setupImGuiTheme() {
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec4* colors = style.Colors;

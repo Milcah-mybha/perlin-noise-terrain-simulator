@@ -1,3 +1,8 @@
+/**
+ * @file water.vert
+ * @brief Vertex Shader cho Mặt nước: tính toán độ cao sóng nhấp nhô thời gian thực (Gerstner Waves) và vector pháp tuyến.
+ */
+
 #version 330 core
 
 layout (location = 0) in vec3 aPos;
@@ -17,14 +22,13 @@ uniform float uWaterHeight;
 void main() {
     vec3 pos = aPos;
 
-    // Hiệu ứng sóng nhấp nhô thời gian thực (Gerstner / Sine Wave approximation)
+    // Sóng nhấp nhô thời gian thực
     float wave1 = sin(pos.x * 0.15 + uTime * 2.0) * 0.25;
     float wave2 = cos(pos.z * 0.20 + uTime * 1.5) * 0.20;
     float wave3 = sin((pos.x + pos.z) * 0.10 + uTime * 2.5) * 0.15;
-    
     pos.y = uWaterHeight + wave1 + wave2 + wave3;
 
-    // Tính đạo hàm để cập nhật vector pháp tuyến của sóng
+    // Đạo hàm tính vector pháp tuyến của sóng
     float dx = 0.15 * cos(pos.x * 0.15 + uTime * 2.0) * 0.25 + 0.10 * cos((pos.x + pos.z) * 0.10 + uTime * 2.5) * 0.15;
     float dz = -0.20 * sin(pos.z * 0.20 + uTime * 1.5) * 0.20 + 0.10 * cos((pos.x + pos.z) * 0.10 + uTime * 2.5) * 0.15;
     vec3 waveNormal = normalize(vec3(-dx, 1.0, -dz));
