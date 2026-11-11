@@ -235,7 +235,7 @@ int main() {
         ImGui::End();
 
         // 2. Thanh nút tác vụ nhanh góc trên bên phải (Top Action Bar)
-        float topBarWidth = showControlPanel ? 320.0f : 230.0f;
+        float topBarWidth = showControlPanel ? 360.0f : 240.0f;
         ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - topBarWidth - 16, 16), ImGuiCond_Always);
         ImGui::SetNextWindowBgAlpha(0.85f);
         ImGui::Begin("Tác Vụ Nhanh##TopBar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove);
@@ -252,7 +252,7 @@ int main() {
 
         // 3. Bảng điều khiển chính docked cạnh phải màn hình (tự co dãn theo toàn màn hình)
         if (showControlPanel) {
-            float panelWidth = 360.0f;
+            float panelWidth = 410.0f;
             ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - panelWidth - 16, 62), ImGuiCond_Always);
             ImGui::SetNextWindowSize(ImVec2(panelWidth, io.DisplaySize.y - 78), ImGuiCond_Always);
             ImGui::SetNextWindowBgAlpha(0.88f);
@@ -269,7 +269,7 @@ int main() {
             // --- MỤC 1: CÁC DẠNG ĐỊA HÌNH MẪU (PRESETS) ---
             ImGui::TextColored(ImVec4(0.45f, 0.75f, 1.0f, 1.0f), "1. CÁC DẠNG ĐỊA HÌNH MẪU (PRESETS):");
             
-            float btnW = 166.0f;
+            float btnW = 188.0f;
             float btnH = 30.0f;
 
             if (ImGui::Button("Quần đảo tự nhiên", ImVec2(btnW, btnH))) {
@@ -304,15 +304,17 @@ int main() {
             
             bool needRegen = false;
 
-            needRegen |= ImGui::SliderFloat("Tần số sóng (Frequency)", &terrain.freq, 1.0f, 6.0f, "%.1f");
-            needRegen |= ImGui::SliderInt("Số tầng chi tiết (Octaves)", &terrain.octaves, 1, 9);
-            needRegen |= ImGui::SliderFloat("Độ biến thiên (Lacunarity)", &terrain.lacunarity, 1.4f, 3.0f, "%.2f");
-            needRegen |= ImGui::SliderFloat("Độ sắc nét (Persistence)", &terrain.persistence, 0.2f, 0.85f, "%.2f");
-            needRegen |= ImGui::SliderFloat("Chiều cao núi (Height Scale)", &terrain.heightScale, 10.0f, 60.0f, "%.1f m");
+            ImGui::PushItemWidth(160.0f);
+            needRegen |= ImGui::SliderFloat("Tần số sóng", &terrain.freq, 1.0f, 6.0f, "%.1f");
+            needRegen |= ImGui::SliderInt("Số tầng chi tiết", &terrain.octaves, 1, 9);
+            needRegen |= ImGui::SliderFloat("Độ biến thiên", &terrain.lacunarity, 1.4f, 3.0f, "%.2f");
+            needRegen |= ImGui::SliderFloat("Độ sắc nét", &terrain.persistence, 0.2f, 0.85f, "%.2f");
+            needRegen |= ImGui::SliderFloat("Chiều cao núi", &terrain.heightScale, 10.0f, 60.0f, "%.1f m");
             
-            if (ImGui::SliderFloat("Mực nước biển (Water Level)", &terrain.waterLevel, 0.05f, 0.85f, "%.2f")) {
+            if (ImGui::SliderFloat("Mực nước biển", &terrain.waterLevel, 0.05f, 0.85f, "%.2f")) {
                 // Mực nước biển cập nhật tức thì thời gian thực
             }
+            ImGui::PopItemWidth();
 
             if (needRegen) {
                 terrain.generate(perlin);
@@ -334,10 +336,14 @@ int main() {
                 "Bản đồ nhiệt độ cao (Elevation Heatmap)",
                 "Thang xám viễn thám (Grayscale Heightmap)"
             };
-            ImGui::Combo("Bảng màu", &colorMode, viewOptions, IM_ARRAYSIZE(viewOptions));
+
+            ImGui::Text("Bảng màu hiển thị:");
+            ImGui::PushItemWidth(-1);
+            ImGui::Combo("##ColorMode", &colorMode, viewOptions, IM_ARRAYSIZE(viewOptions));
+            ImGui::PopItemWidth();
 
             ImGui::Checkbox("Lưới khung dây 3D (Wireframe)", &wireframeMode);
-            ImGui::SameLine();
+            ImGui::SameLine(200);
             ImGui::Checkbox("Mặt nước đại dương", &renderWater);
 
             if (ImGui::Button(rotateSun ? "Tạm dừng quay mặt trời" : "Tiếp tục quay mặt trời", ImVec2(-1, 28))) {
