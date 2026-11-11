@@ -1,8 +1,3 @@
-/**
- * @file Shader.h
- * @brief Định nghĩa lớp Shader nạp mã nguồn GLSL từ tệp, biên dịch và truyền tham số Uniform vào GPU.
- */
-
 #ifndef SHADER_H
 #define SHADER_H
 
@@ -14,12 +9,14 @@ class Shader {
 public:
     unsigned int ID;
 
+    // Đọc và biên dịch Shader
     Shader(const char* vertexPath, const char* fragmentPath);
     ~Shader();
 
+    // Kích hoạt Shader Program
     void use() const;
 
-    // === TRUYỀN DỮ LIỆU UNIFORM XUỐNG SHADER ===
+    // Truyền dữ liệu Uniform vào Shader
     void setBool(const std::string& name, bool value) const;
     void setInt(const std::string& name, int value) const;
     void setFloat(const std::string& name, float value) const;

@@ -1,15 +1,10 @@
-/**
- * @file Shader.cpp
- * @brief Hiện thực đọc tệp, biên dịch Vertex/Fragment Shader và thiết lập các biến Uniform.
- */
-
 #include "Shader.h"
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <glm/gtc/type_ptr.hpp>
 
-// === 1. ĐỌC TỆP VÀ BIÊN DỊCH SHADER PROGRAM ===
+// Đọc tệp và biên dịch Vertex Shader, Fragment Shader
 Shader::Shader(const char* vertexPath, const char* fragmentPath) {
     std::string vertexCode;
     std::string fragmentCode;
@@ -64,11 +59,11 @@ Shader::~Shader() {
     glDeleteProgram(ID);
 }
 
+// Kích hoạt Shader Program
 void Shader::use() const {
     glUseProgram(ID);
 }
 
-// === 2. CÁC HÀM TRUYỀN UNIFORM ===
 void Shader::setBool(const std::string& name, bool value) const {
     glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
 }
@@ -93,7 +88,7 @@ void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
     glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
 }
 
-// === 3. KIỂM TRA LỖI BIÊN DỊCH SHADER ===
+// Kiểm tra lỗi biên dịch shader
 void Shader::checkCompileErrors(unsigned int shader, const std::string& type) {
     int success;
     char infoLog[1024];

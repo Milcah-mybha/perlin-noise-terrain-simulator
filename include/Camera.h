@@ -1,8 +1,3 @@
-/**
- * @file Camera.h
- * @brief Định nghĩa lớp Camera 3D điều khiển góc nhìn tự do (FPS/Orbit), hỗ trợ xoay chuột mượt mà và tính ma trận View.
- */
-
 #ifndef CAMERA_H
 #define CAMERA_H
 
@@ -20,7 +15,6 @@ enum Camera_Movement {
 
 class Camera {
 public:
-    // === CÁC THÔNG SỐ VỊ TRÍ VÀ HƯỚNG NHÌN ===
     glm::vec3 Position;
     glm::vec3 Front;
     glm::vec3 Up;
@@ -33,7 +27,6 @@ public:
     float MouseSensitivity;
     float Zoom;
 
-    // === CÁC BIẾN NỘI SUY LÀM MỊN (SMOOTH DAMPING) ===
     glm::vec3 targetVelocity;
     glm::vec3 currentVelocity;
     float targetYaw;
@@ -43,20 +36,30 @@ public:
     float mouseDamping;
     bool isSprint;
 
+    // Khởi tạo camera
     Camera(glm::vec3 position = glm::vec3(0.0f, 45.0f, 125.0f),
            glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f),
            float yaw = -90.0f,
            float pitch = -25.0f);
 
+    // Lấy ma trận quan sát View Matrix
     glm::mat4 GetViewMatrix() const;
 
-    // === XỬ LÝ ĐIỀU KHIỂN BÀN PHÍM VÀ CHUỘT ===
+    // Xử lý di chuyển bàn phím
     void ProcessKeyboard(Camera_Movement direction);
+
+    // Xử lý xoay góc nhìn chuột
     void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
+
+    // Xử lý cuộn chuột zoom FOV
     void ProcessMouseScroll(float yoffset);
+
     void SetSprint(bool enable) { isSprint = enable; }
 
+    // Cập nhật tọa độ mượt mà mỗi frame
     void Update(float deltaTime);
+
+    // Đặt lại góc nhìn mặc định
     void Reset(glm::vec3 position, float yaw = -90.0f, float pitch = -25.0f);
 
 private:

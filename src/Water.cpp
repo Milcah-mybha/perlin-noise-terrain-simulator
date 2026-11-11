@@ -1,11 +1,5 @@
-/**
- * @file Water.cpp
- * @brief Hiện thực khởi tạo lưới mặt nước phẳng và vẽ mặt nước với Shader sóng đại dương.
- */
-
 #include "Water.h"
 
-// === 1. KHỞI TẠO VÀ HỦY LƯỚI NƯỚC ===
 Water::Water(float s, float h) : waterHeight(h), size(s), VAO(0), VBO(0), EBO(0), indexCount(0) {
     setupMesh();
 }
@@ -16,7 +10,7 @@ Water::~Water() {
     if (EBO != 0) glDeleteBuffers(1, &EBO);
 }
 
-// === 2. TẠO LƯỚI ĐỈNH MẶT NƯỚC ĐẠI DƯƠNG ===
+// Khởi tạo lưới phẳng cho mặt nước
 void Water::setupMesh() {
     const int segments = 70;
     std::vector<float> vertices;
@@ -86,7 +80,7 @@ void Water::setupMesh() {
     glBindVertexArray(0);
 }
 
-// === 3. VẼ MẶT NƯỚC ===
+// Vẽ mặt nước lên GPU
 void Water::draw(const Shader& shader, float time) const {
     if (VAO == 0) return;
     shader.use();

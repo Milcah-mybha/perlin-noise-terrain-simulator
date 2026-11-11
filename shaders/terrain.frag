@@ -1,8 +1,3 @@
-/**
- * @file terrain.frag
- * @brief Fragment Shader cho Địa hình: tính toán chiếu sáng Blinn-Phong, phân bố màu Biome tự nhiên, vách đá và sương mù.
- */
-
 #version 330 core
 
 in vec3 FragPos;
@@ -12,41 +7,40 @@ in float NormalizedHeight;
 
 out vec4 FragColor;
 
-// === 1. THAM SỐ ÁNH SÁNG VÀ MÔI TRƯỜNG ===
 uniform vec3 uLightDir;
 uniform vec3 uLightColor;
 uniform vec3 uAmbientColor;
 uniform vec3 uViewPos;
 
 uniform float uWaterLevel;
-uniform int uColorMode; // 0: Biomes, 1: Heatmap, 2: Grayscale
+uniform int uColorMode;
 
-// === 2. BẢNG MÀU BIOME SINH THÁI TỰ NHIÊN ===
+// Phân bố màu sinh thái tự nhiên theo độ cao và độ dốc
 vec3 getBiomeColor(float t, float w, float slope) {
     vec3 c;
     if (t < w - 0.04) {
-        c = vec3(0.14, 0.30, 0.38); // Đáy biển
+        c = vec3(0.14, 0.30, 0.38);
     } else if (t < w + 0.035) {
-        c = vec3(0.88, 0.82, 0.62); // Bãi cát vàng
+        c = vec3(0.88, 0.82, 0.62);
     } else if (t < 0.60) {
         float k = clamp((t - (w + 0.035)) / 0.16, 0.0, 1.0);
-        c = mix(vec3(0.38, 0.65, 0.30), vec3(0.24, 0.48, 0.22), k); // Đồng cỏ
+        c = mix(vec3(0.38, 0.65, 0.30), vec3(0.24, 0.48, 0.22), k);
     } else if (t < 0.78) {
         float k = (t - 0.60) / 0.18;
-        c = mix(vec3(0.24, 0.48, 0.22), vec3(0.55, 0.50, 0.45), k); // Rừng cao
+        c = mix(vec3(0.24, 0.48, 0.22), vec3(0.55, 0.50, 0.45), k);
     } else {
         float k = clamp((t - 0.78) / 0.12, 0.0, 1.0);
-        c = mix(vec3(0.55, 0.50, 0.45), vec3(0.96, 0.97, 0.99), k); // Băng tuyết
+        c = mix(vec3(0.55, 0.50, 0.45), vec3(0.96, 0.97, 0.99), k);
     }
 
     float s = clamp((slope - 0.32) / 0.42, 0.0, 1.0);
     if (t > w + 0.035) {
-        c = mix(c, vec3(0.46, 0.42, 0.38), s * 0.85); // Vách đá dốc
+        c = mix(c, vec3(0.46, 0.42, 0.38), s * 0.85);
     }
     return c;
 }
 
-// === 3. BẢNG MÀU NHIỆT ĐỒ ĐỘ CAO (HEATMAP) ===
+// Bảng màu nhiệt đồ độ cao
 vec3 getHeatmapColor(float t) {
     if (t < 0.25) return mix(vec3(0.0, 0.15, 0.85), vec3(0.0, 0.85, 0.85), t / 0.25);
     if (t < 0.50) return mix(vec3(0.0, 0.85, 0.85), vec3(0.2, 0.85, 0.2), (t - 0.25) / 0.25);
@@ -54,12 +48,11 @@ vec3 getHeatmapColor(float t) {
     return mix(vec3(0.95, 0.85, 0.1), vec3(0.95, 0.15, 0.15), (t - 0.75) / 0.25);
 }
 
-// === 4. BẢNG MÀU THANG XÁM (GRAYSCALE) ===
+// Bảng màu thang xám
 vec3 getGrayscaleColor(float t) {
     return vec3(t * 0.88 + 0.08);
 }
 
-// === 5. ĐƯỜNG ỐNG CHIẾU SÁNG BLINN-PHONG ===
 void main() {
     vec3 norm = normalize(Normal);
     float slope = 1.0 - norm.y;
@@ -90,6 +83,7 @@ void main() {
         }
     }
 
+    // Chiếu sáng Blinn-Phong và ánh sáng môi trường
     float skyHemisphere = norm.y * 0.5 + 0.5;
     vec3 ambient = mix(uAmbientColor * 0.85, uAmbientColor * 1.15, skyHemisphere) * albedo;
 
@@ -105,6 +99,7 @@ void main() {
 
     vec3 finalColor = ambient + diffuse + specular;
 
+    // Sương mù chân trời
     vec3 skyHorizon = vec3(0.60, 0.73, 0.88);
     float dist = length(uViewPos - FragPos);
     float fog = clamp((dist - 140.0) / 380.0, 0.0, 0.70);

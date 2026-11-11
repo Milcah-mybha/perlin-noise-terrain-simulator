@@ -1,8 +1,3 @@
-/**
- * @file Terrain.h
- * @brief Định nghĩa lớp Địa hình 3D (Terrain Mesh), quản lý lưới độ cao, Vector pháp tuyến và phân bố độ cao.
- */
-
 #ifndef TERRAIN_H
 #define TERRAIN_H
 
@@ -35,9 +30,13 @@ public:
     Terrain(int resolution = 180, float size = 120.0f);
     ~Terrain();
 
-    // === SINH LƯỚI ĐỊA HÌNH VÀ VẼ LÊN GPU ===
+    // Sinh bản đồ độ cao và dựng lưới 3D
     void generate(PerlinNoise& noise);
+
+    // Áp dụng bộ thông số địa hình mẫu
     void applyPreset(PresetType preset, PerlinNoise& noise);
+
+    // Vẽ địa hình lên GPU
     void draw(const Shader& shader) const;
 
     float getMinHeight() const { return minHeight; }
@@ -49,7 +48,6 @@ private:
     unsigned int VAO, VBO, EBO;
     int indexCount;
 
-    // === CHÂN VÁCH ĐỊA TẦNG DƯỚI ĐÁY BIỂN (SKIRT) ===
     unsigned int skirtVAO, skirtVBO, skirtEBO;
     int skirtIndexCount;
 

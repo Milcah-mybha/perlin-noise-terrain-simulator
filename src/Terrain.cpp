@@ -1,8 +1,3 @@
-/**
- * @file Terrain.cpp
- * @brief Hiện thực sinh lưới địa hình 3D từ thuật toán Perlin Noise, tính toán pháp tuyến và tạo vách chân địa tầng.
- */
-
 #include "Terrain.h"
 #include <cmath>
 #include <algorithm>
@@ -32,7 +27,7 @@ Terrain::~Terrain() {
     if (skirtEBO != 0) glDeleteBuffers(1, &skirtEBO);
 }
 
-// === 1. THIẾT LẬP CÁC DẠNG ĐỊA HÌNH MẪU (PRESETS) ===
+// Áp dụng cấu hình mẫu theo preset
 void Terrain::applyPreset(PresetType preset, PerlinNoise& noise) {
     currentPreset = preset;
     switch (preset) {
@@ -88,7 +83,7 @@ void Terrain::applyPreset(PresetType preset, PerlinNoise& noise) {
     generate(noise);
 }
 
-// === 2. TÍNH TOÁN BẢN ĐỒ ĐỘ CAO VÀ ĐỈNH LƯỚI 3D ===
+// Sinh bản đồ độ cao và tính vector pháp tuyến
 void Terrain::generate(PerlinNoise& noise) {
     vertices.clear();
     indices.clear();
@@ -149,7 +144,7 @@ void Terrain::generate(PerlinNoise& noise) {
     float halfSize = worldSize * 0.5f;
     float step = worldSize / (n - 1);
 
-    // === 3. TÍNH PHÁP TUYẾN BẰNG PHƯƠNG PHÁP SAI PHÂN TRUNG TÂM (CENTRAL DIFFERENCES) ===
+    // Tính pháp tuyến bằng phương pháp sai phân trung tâm
     for (int j = 0; j < n; ++j) {
         for (int i = 0; i < n; ++i) {
             int idx = j * n + i;
@@ -181,6 +176,7 @@ void Terrain::generate(PerlinNoise& noise) {
         }
     }
 
+    // Ghép tam giác cho lưới địa hình
     for (int j = 0; j < n - 1; ++j) {
         for (int i = 0; i < n - 1; ++i) {
             unsigned int topLeft     = j * n + i;
@@ -204,7 +200,7 @@ void Terrain::generate(PerlinNoise& noise) {
     setupMesh();
 }
 
-// === 4. TẠO VÁCH ĐỊA TẦNG TRẦM TÍCH BÊN DƯỚI (SKIRT) ===
+// Dựng vách chân địa tầng chìm dưới nước
 void Terrain::buildSkirt(const std::vector<float>& heightMap) {
     skirtVertices.clear();
     skirtIndices.clear();
@@ -268,6 +264,7 @@ void Terrain::buildSkirt(const std::vector<float>& heightMap) {
     skirtIndexCount = static_cast<int>(skirtIndices.size());
 }
 
+// Tính tỷ lệ diện tích đất liền nổi trên mặt nước
 float Terrain::getLandPercentage() const {
     if (vertices.empty()) return 50.0f;
     int landCount = 0;
@@ -279,7 +276,7 @@ float Terrain::getLandPercentage() const {
     return (static_cast<float>(landCount) / vertices.size()) * 100.0f;
 }
 
-// === 5. CẤU HÌNH VBO/VAO CHO OPENGL ===
+// Cấu hình VAO/VBO cho OpenGL
 void Terrain::setupMesh() {
     if (VAO == 0) {
         glGenVertexArrays(1, &VAO);
@@ -324,7 +321,7 @@ void Terrain::setupMesh() {
     glBindVertexArray(0);
 }
 
-// === 6. VẼ ĐỊA HÌNH VÀ VÁCH ĐỊA TẦNG ===
+// Vẽ địa hình và chân vách
 void Terrain::draw(const Shader& shader) const {
     if (VAO == 0 || indexCount == 0) return;
 

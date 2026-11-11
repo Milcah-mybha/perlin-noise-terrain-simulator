@@ -1,8 +1,3 @@
-/**
- * @file terrain.vert
- * @brief Vertex Shader cho Địa hình: chuyển vị trí không gian 3D, tính ma trận pháp tuyến và truyền độ cao chuẩn hóa.
- */
-
 #version 330 core
 
 layout (location = 0) in vec3 aPos;

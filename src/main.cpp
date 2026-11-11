@@ -1,8 +1,3 @@
-/**
- * @file main.cpp
- * @brief Điểm khởi đầu chương trình (Entry Point), cấu hình OpenGL, vòng lặp dựng hình chính và giao diện Dear ImGui.
- */
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -23,7 +18,6 @@
 #include "Terrain.h"
 #include "Water.h"
 
-// === 1. THIẾT LẬP THÔNG SỐ CỬA SỔ VÀ CAMERA ===
 int windowWidth = 1366;
 int windowHeight = 768;
 
@@ -39,19 +33,17 @@ bool firstMouse = true;
 bool isDraggingCamera = false;
 bool fpsMode = false;
 
-// === 2. THÔNG SỐ TRẠNG THÁI ỨNG DỤNG ===
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 bool wireframeMode = false;
-int colorMode = 0; // 0: Biomes, 1: Heatmap, 2: Grayscale
+int colorMode = 0;
 bool renderWater = true;
 bool rotateSun = true;
 float sunAngle = 45.0f;
 float sunSpeed = 6.0f;
 bool showControlPanel = true;
 
-// === 3. KHAI BÁO CÁC HÀM CALLBACK ===
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
@@ -60,7 +52,7 @@ void processInput(GLFWwindow* window);
 void setupImGuiTheme();
 
 int main() {
-    // === 4. KHỞI TẠO GLFW VÀ GLAD ===
+    // Khởi tạo GLFW
     if (!glfwInit()) {
         std::cerr << "Lỗi: Không khởi tạo được GLFW!" << std::endl;
         return -1;
@@ -81,6 +73,7 @@ int main() {
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetMouseButtonCallback(window, mouse_button_callback);
 
+    // Nạp con trỏ hàm OpenGL qua GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Lỗi: Không nạp được GLAD!" << std::endl;
         return -1;
@@ -90,7 +83,7 @@ int main() {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    // === 5. KHỞI TẠO DEAR IMGUI & PHÔNG CHỮ TIẾNG VIỆT UNICODE ===
+    // Cấu hình Dear ImGui và phông chữ tiếng Việt Unicode
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -117,7 +110,7 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
 
-    // === 6. TẢI SHADER VÀ KHỞI TẠO ĐỐI TƯỢNG 3D ===
+    // Khởi tạo Shader và các đối tượng 3D
     Shader terrainShader("shaders/terrain.vert", "shaders/terrain.frag");
     Shader waterShader("shaders/water.vert", "shaders/water.frag");
 
@@ -128,7 +121,7 @@ int main() {
     Water water(420.0f, terrain.waterLevel * terrain.heightScale);
     glm::vec3 skyColor(0.60f, 0.73f, 0.88f);
 
-    // === 7. VÒNG LẶP DỰNG HÌNH CHÍNH (RENDER LOOP) ===
+    // Vòng lặp dựng hình chính
     while (!glfwWindowShouldClose(window)) {
         float currentFrame = static_cast<float>(glfwGetTime());
         deltaTime = currentFrame - lastFrame;
@@ -158,7 +151,7 @@ int main() {
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 model = glm::mat4(1.0f);
 
-        // === 8. VẼ ĐỊA HÌNH 3D ===
+        // Vẽ địa hình
         if (wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         } else {
@@ -180,7 +173,7 @@ int main() {
 
         terrain.draw(terrainShader);
 
-        // === 9. VẼ MẶT NƯỚC ĐẠI DƯƠNG ===
+        // Vẽ mặt nước đại dương
         if (renderWater && !wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             waterShader.use();
@@ -196,10 +189,10 @@ int main() {
             water.draw(waterShader, currentFrame);
         }
 
-        // === 10. DỰNG GIAO DIỆN DEAR IMGUI ===
+        // Render giao diện ImGui
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        // Thẻ thông số nổi góc trên bên trái
+        // Bảng thông số góc trái
         ImGui::SetNextWindowPos(ImVec2(16, 16), ImGuiCond_Always);
         ImGui::SetNextWindowBgAlpha(0.85f);
         ImGui::Begin("Thống Số##StatsCard", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove);
@@ -226,7 +219,7 @@ int main() {
         }
         ImGui::End();
 
-        // Thanh nút tác vụ nhanh góc trên bên phải
+        // Thanh nút tác vụ góc trên phải
         float topBarWidth = showControlPanel ? 360.0f : 240.0f;
         ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - topBarWidth - 16, 16), ImGuiCond_Always);
         ImGui::SetNextWindowBgAlpha(0.85f);
@@ -242,7 +235,7 @@ int main() {
         }
         ImGui::End();
 
-        // Bảng điều khiển chính docked cạnh phải màn hình
+        // Bảng điều khiển chính bên phải
         if (showControlPanel) {
             float panelWidth = 410.0f;
             ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x - panelWidth - 16, 62), ImGuiCond_Always);
@@ -370,7 +363,7 @@ int main() {
     return 0;
 }
 
-// === 11. XỬ LÝ SỰ KIỆN ĐẦU VÀO PHÍM TẮT ===
+// Xử lý sự kiện bàn phím
 void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
         if (fpsMode) {
@@ -421,7 +414,7 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_RELEASE) tabPressed = false;
 }
 
-// === 12. XỬ LÝ SỰ KIỆN CHUỘT (CLICK & DRAG) ===
+// Xử lý sự kiện nút chuột
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     ImGuiIO& io = ImGui::GetIO();
 
@@ -440,6 +433,7 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     }
 }
 
+// Xử lý sự kiện di chuyển chuột
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     float xpos = static_cast<float>(xposIn);
     float ypos = static_cast<float>(yposIn);
@@ -461,6 +455,7 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     }
 }
 
+// Xử lý sự kiện cuộn chuột
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     ImGuiIO& io = ImGui::GetIO();
     if (!io.WantCaptureMouse) {
@@ -468,6 +463,7 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset) {
     }
 }
 
+// Xử lý thay đổi kích thước cửa sổ
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     if (width > 0 && height > 0) {
         windowWidth = width;
@@ -476,7 +472,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     }
 }
 
-// === 13. GIAO DIỆN THEME CHO DEAR IMGUI ===
+// Cấu hình giao diện màu sắc ImGui
 void setupImGuiTheme() {
     ImGuiStyle& style = ImGui::GetStyle();
     ImVec4* colors = style.Colors;
