@@ -25,4 +25,4 @@ private:
     void checkCompileErrors(unsigned int shader, const std::string& type);
 };
 
-#endif // SHADER_H
+#endif

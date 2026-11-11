@@ -59,4 +59,4 @@ private:
     void updateCameraVectors();
 };
 
-#endif // CAMERA_H
+#endif

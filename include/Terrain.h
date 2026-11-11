@@ -61,4 +61,4 @@ private:
     void buildSkirt(const std::vector<float>& heightMap);
 };
 
-#endif // TERRAIN_H
+#endif

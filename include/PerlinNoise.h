@@ -45,4 +45,4 @@ private:
     static float grad(int hash, float x, float y);
 };
 
-#endif // PERLIN_NOISE_H
+#endif

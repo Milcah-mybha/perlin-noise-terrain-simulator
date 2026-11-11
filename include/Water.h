@@ -23,4 +23,4 @@ private:
     void setupMesh();
 };
 
-#endif // WATER_H
+#endif

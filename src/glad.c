@@ -2411,10 +2411,6 @@ static int find_extensionsGL(void) {
 
 static void find_coreGL(void) {
 
-    /* Thank you @elmindreda
-     * https://github.com/elmindreda/greg/blob/master/templates/greg.c.in#L176
-     * https://github.com/glfw/glfw/blob/master/src/context.c#L36
-     */
     int i, major, minor;
 
     const char* version;
@@ -2436,7 +2432,6 @@ static void find_coreGL(void) {
         }
     }
 
-/* PR #18 */
 #ifdef _MSC_VER
     sscanf_s(version, "%d.%d", &major, &minor);
 #else
@@ -2498,4 +2493,3 @@ int gladLoadGLLoader(GLADloadproc load) {
 	load_GL_KHR_debug(load);
 	return GLVersion.major != 0 || GLVersion.minor != 0;
 }
-
