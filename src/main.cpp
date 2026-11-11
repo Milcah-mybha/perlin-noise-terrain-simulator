@@ -22,10 +22,10 @@
 const unsigned int SCR_WIDTH = 1366;
 const unsigned int SCR_HEIGHT = 768;
 
-// VỊ TRÍ XUẤT HIỆN TRÊN CAO (GÓC NHÌN TOÀN CẢNH ĐỂ QUAN SÁT CẢ MAP ĐỊA HÌNH VÀ NƯỚC)
-const glm::vec3 DEFAULT_CAM_POS(0.0f, 105.0f, 150.0f);
-const float DEFAULT_YAW   = -90.0f;
-const float DEFAULT_PITCH = -32.0f;
+// GÓC NHÌN TRÊN CAO TOÀN CẢNH (OVERVIEW ISOMETRIC 3/4) GIỐNG HỆT ẢNH MẪU
+const glm::vec3 DEFAULT_CAM_POS(110.0f, 92.0f, 130.0f);
+const float DEFAULT_YAW   = -130.0f;
+const float DEFAULT_PITCH = -28.0f;
 
 Camera camera(DEFAULT_CAM_POS, glm::vec3(0.0f, 1.0f, 0.0f), DEFAULT_YAW, DEFAULT_PITCH);
 
@@ -40,12 +40,11 @@ float lastFrame = 0.0f;
 
 // Trạng thái ứng dụng
 bool wireframeMode = false;
-bool fogEnabled = true;
 int colorMode = 0; // 0: Biomes, 1: Heatmap, 2: Grayscale
 bool renderWater = true;
 bool rotateSun = true;
-float sunAngle = 55.0f;
-float sunSpeed = 8.0f;
+float sunAngle = 45.0f;
+float sunSpeed = 6.0f;
 
 // Callbacks
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -121,13 +120,15 @@ int main() {
     Shader waterShader("shaders/water.vert", "shaders/water.frag");
 
     PerlinNoise perlin(2026);
-    Terrain terrain(220, 220, 1.0f);
-    terrain.generate(perlin);
+    Terrain terrain(180, 120.0f);
+    // Khởi tạo ngay lập tức dạng QUẦN ĐẢO (Islands) chuẩn xác theo hình ảnh tham khảo
+    terrain.applyPreset(PRESET_ISLANDS, perlin);
 
-    // Mặt nước tự nhiên bao quanh
-    Water water(300.0f, 5.5f);
+    // Mặt nước biển phẳng khớp khay sa bàn
+    Water water(120.0f, terrain.waterLevel * terrain.heightScale);
 
-    glm::vec3 skyColor(0.66f, 0.79f, 0.92f);
+    // Màu nền phòng triển lãm Studio Gallery sang trọng
+    glm::vec3 studioBg(0.06f, 0.08f, 0.12f);
 
     // 7. Vòng lặp render chính
     while (!glfwWindowShouldClose(window)) {
@@ -137,7 +138,6 @@ int main() {
 
         if (deltaTime > 0.1f) deltaTime = 0.1f;
 
-        // Xử lý phím bấm & Cập nhật Camera mượt mà với quán tính lướt
         processInput(window);
         camera.Update(deltaTime);
 
@@ -152,18 +152,18 @@ int main() {
             if (sunAngle > 360.0f) sunAngle -= 360.0f;
         }
         float sunRad = glm::radians(sunAngle);
-        glm::vec3 lightDir = glm::normalize(glm::vec3(cos(sunRad), -0.72f, sin(sunRad)));
+        glm::vec3 lightDir = glm::normalize(glm::vec3(cos(sunRad), -0.85f, sin(sunRad)));
 
         // Xóa màn hình
-        glClearColor(skyColor.r, skyColor.g, skyColor.b, 1.0f);
+        glClearColor(studioBg.r, studioBg.g, studioBg.b, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Ma trận Projection & View
+        // Cập nhật ma trận
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 600.0f);
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 model = glm::mat4(1.0f);
 
-        // ================= VẼ ĐỊA HÌNH =================
+        // ================= VẼ SA BÀN ĐỊA HÌNH =================
         if (wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         } else {
@@ -178,20 +178,14 @@ int main() {
         terrainShader.setVec3("uViewPos", camera.Position);
         terrainShader.setVec3("uLightDir", lightDir);
         terrainShader.setVec3("uLightColor", glm::vec3(1.0f, 0.98f, 0.92f));
-        terrainShader.setVec3("uAmbientColor", glm::vec3(0.24f, 0.27f, 0.32f));
+        terrainShader.setVec3("uAmbientColor", glm::vec3(0.28f, 0.32f, 0.38f));
 
-        terrainShader.setFloat("uMinHeight", terrain.getMinHeight());
-        terrainShader.setFloat("uMaxHeight", terrain.getMaxHeight());
+        terrainShader.setFloat("uWaterLevel", terrain.waterLevel);
         terrainShader.setInt("uColorMode", colorMode);
-
-        terrainShader.setBool("uFogEnabled", fogEnabled);
-        terrainShader.setVec3("uFogColor", skyColor);
-        terrainShader.setFloat("uFogStart", 80.0f);
-        terrainShader.setFloat("uFogEnd", 320.0f);
 
         terrain.draw(terrainShader);
 
-        // ================= VẼ MẶT NƯỚC =================
+        // ================= VẼ MẶT NƯỚC BIỂN =================
         if (renderWater && !wireframeMode) {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             waterShader.use();
@@ -201,35 +195,31 @@ int main() {
 
             waterShader.setVec3("uViewPos", camera.Position);
             waterShader.setVec3("uLightDir", lightDir);
-            waterShader.setVec3("uLightColor", glm::vec3(1.0f, 0.98f, 0.90f));
+            waterShader.setVec3("uLightColor", glm::vec3(1.0f, 0.98f, 0.92f));
 
-            waterShader.setBool("uFogEnabled", fogEnabled);
-            waterShader.setVec3("uFogColor", skyColor);
-            waterShader.setFloat("uFogStart", 80.0f);
-            waterShader.setFloat("uFogEnd", 320.0f);
-
+            water.waterHeight = terrain.waterLevel * terrain.heightScale;
             water.draw(waterShader, currentFrame);
         }
 
         // ================= BẢNG ĐIỀU KHIỂN TIẾNG VIỆT =================
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        // 1. Thẻ thông số nổi (Badges)
+        // 1. Thẻ thông số nổi (Badges) góc trên bên trái
         ImGui::SetNextWindowPos(ImVec2(18, 18), ImGuiCond_Always);
         ImGui::SetNextWindowBgAlpha(0.88f);
         ImGui::Begin("Thẻ Thống Số##Badges", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoMove);
         {
-            ImGui::TextColored(ImVec4(0.45f, 0.70f, 1.0f, 1.0f), "Phòng Thí Nghiệm Địa Hình Perlin Noise 3D");
+            ImGui::TextColored(ImVec4(0.55f, 0.75f, 1.0f, 1.0f), "Phòng Thí Nghiệm Địa Hình Perlin Noise 3D");
             ImGui::Separator();
             
-            float landPct = terrain.getLandPercentage(renderWater ? water.waterHeight : -999.0f);
+            float landPct = terrain.getLandPercentage();
 
             ImGui::Text("Số tầng (Octaves): "); ImGui::SameLine();
             ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.5f, 1.0f), "%d", terrain.octaves);
             ImGui::SameLine(180);
             ImGui::Text("Khoảng cao: "); ImGui::SameLine();
-            ImGui::TextColored(ImVec4(1.0f, 0.85f, 0.2f, 1.0f), "%.1f .. %.1f m", terrain.getMinHeight(), terrain.getMaxHeight());
-            ImGui::SameLine(360);
+            ImGui::TextColored(ImVec4(1.0f, 0.85f, 0.2f, 1.0f), "-0.45 .. 0.50");
+            ImGui::SameLine(340);
             ImGui::Text("Đất liền: "); ImGui::SameLine();
             ImGui::TextColored(ImVec4(0.3f, 0.9f, 1.0f, 1.0f), "%.0f %%", landPct);
         }
@@ -258,16 +248,16 @@ int main() {
         float btnWidth = 192.0f;
         float btnHeight = 32.0f;
 
+        if (ImGui::Button("Quần đảo đại dương (Islands)", ImVec2(btnWidth, btnHeight))) {
+            terrain.applyPreset(PRESET_ISLANDS, perlin);
+        }
+        ImGui::SameLine();
         if (ImGui::Button("Đồi núi nhấp nhô", ImVec2(btnWidth, btnHeight))) {
             terrain.applyPreset(PRESET_ROLLING_HILLS, perlin);
         }
-        ImGui::SameLine();
+
         if (ImGui::Button("Dãy núi nhọn (Alpine)", ImVec2(btnWidth, btnHeight))) {
             terrain.applyPreset(PRESET_ALPINE_RIDGES, perlin);
-        }
-
-        if (ImGui::Button("Quần đảo đại dương", ImVec2(btnWidth, btnHeight))) {
-            terrain.applyPreset(PRESET_ISLANDS, perlin);
         }
         ImGui::SameLine();
         if (ImGui::Button("Đơn tầng (không gồ ghề)", ImVec2(btnWidth, btnHeight))) {
@@ -316,12 +306,7 @@ int main() {
 
         ImGui::Checkbox("Chế độ Khung dây (Wireframe Mesh)", &wireframeMode);
         ImGui::SameLine();
-        ImGui::Checkbox("Sương mù (Fog)", &fogEnabled);
-
         ImGui::Checkbox("Hiển thị mặt nước biển", &renderWater);
-        if (renderWater) {
-            ImGui::SliderFloat("Mực nước biển", &water.waterHeight, 0.0f, 25.0f, "%.1f m");
-        }
 
         ImGui::Spacing();
         ImGui::Separator();
@@ -331,12 +316,15 @@ int main() {
         
         bool needRegen = false;
 
-        needRegen |= ImGui::SliderFloat("Tần số lưới (Frequency)", &terrain.noiseScale, 0.005f, 0.040f, "%.4f");
-        needRegen |= ImGui::SliderInt("Số tầng chi tiết (Octaves)", &terrain.octaves, 1, 8);
-        needRegen |= ImGui::SliderFloat("Hệ số tần số (Lacunarity)", &terrain.lacunarity, 1.5f, 3.5f, "%.2f");
-        needRegen |= ImGui::SliderFloat("Hệ số biên độ (Persistence)", &terrain.persistence, 0.2f, 0.8f, "%.2f");
-        needRegen |= ImGui::SliderFloat("Độ cao núi (Height Scale)", &terrain.heightScale, 5.0f, 65.0f, "%.1f");
-        needRegen |= ImGui::SliderFloat("Độ dốc lũy thừa (Redistribution)", &terrain.redistribution, 0.8f, 2.5f, "%.2f");
+        needRegen |= ImGui::SliderFloat("Tần số ô lưới (Frequency)", &terrain.freq, 1.0f, 6.0f, "%.1f");
+        needRegen |= ImGui::SliderInt("Số tầng chi tiết (Octaves)", &terrain.octaves, 1, 9);
+        needRegen |= ImGui::SliderFloat("Hệ số tần số (Lacunarity)", &terrain.lacunarity, 1.4f, 3.0f, "%.2f");
+        needRegen |= ImGui::SliderFloat("Hệ số biên độ (Persistence)", &terrain.persistence, 0.2f, 0.85f, "%.2f");
+        needRegen |= ImGui::SliderFloat("Độ cao núi (Height Scale)", &terrain.heightScale, 10.0f, 50.0f, "%.1f");
+        
+        if (ImGui::SliderFloat("Mực nước biển (Water Level)", &terrain.waterLevel, 0.1f, 0.85f, "%.2f")) {
+            // Mực nước biển cập nhật trực tiếp thời gian thực không cần sinh lại lưới!
+        }
 
         if (needRegen) {
             terrain.generate(perlin);
@@ -381,10 +369,8 @@ void processInput(GLFWwindow* window) {
         }
     }
 
-    // Tăng tốc bay nhanh khi giữ Shift
     camera.SetSprint(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS);
 
-    // Di chuyển Camera (W, A, S, D, Space, Ctrl/C)
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
         camera.ProcessKeyboard(FORWARD);
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -398,7 +384,6 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)
         camera.ProcessKeyboard(DOWN);
 
-    // Phím M: Bật/tắt nhanh chế độ xoay camera
     static bool mPressed = false;
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS && !mPressed) {
         mouseCaptured = !mouseCaptured;
@@ -408,7 +393,6 @@ void processInput(GLFWwindow* window) {
     }
     if (glfwGetKey(window, GLFW_KEY_M) == GLFW_RELEASE) mPressed = false;
 
-    // Phím TAB: Đổi nhanh Wireframe
     static bool tabPressed = false;
     if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_PRESS && !tabPressed) {
         wireframeMode = !wireframeMode;

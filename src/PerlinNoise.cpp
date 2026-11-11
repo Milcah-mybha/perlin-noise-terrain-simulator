@@ -23,7 +23,7 @@ float PerlinNoise::grad(int hash, float x, float y) {
     int h = hash & 7;
     float u = h < 4 ? x : y;
     float v = h < 4 ? y : x;
-    return ((h & 1) ? -u : u) + ((h & 2) ? -2.0f * v : 2.0f * v);
+    return ((h & 1) ? -u : u) + ((h & 2) ? -v : v);
 }
 
 float PerlinNoise::noise2D(float x, float y) const {
@@ -51,7 +51,7 @@ float PerlinNoise::noise2D(float x, float y) const {
     float lerpX1 = lerp(g1, g2, u);
     float lerpX2 = lerp(g3, g4, u);
 
-    return lerp(lerpX1, lerpX2, v) / 1.5f;
+    return lerp(lerpX1, lerpX2, v);
 }
 
 float PerlinNoise::fbm2D(float x, float y, int octaves, float persistence, float lacunarity) const {
