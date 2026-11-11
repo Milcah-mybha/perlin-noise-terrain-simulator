@@ -5,12 +5,12 @@
 #include <cstdint>
 
 enum PresetType {
-    PRESET_ROLLING_HILLS = 0,    // Đồi núi nhấp nhô
-    PRESET_ALPINE_RIDGES = 1,    // Dãy núi nhọn (Alpine)
-    PRESET_ISLANDS = 2,          // Quần đảo đại dương
-    PRESET_SINGLE_OCTAVE = 3,    // Đơn tầng (không chi tiết gồ ghề)
-    PRESET_ROUGH_CRAGS = 4,      // Vách đá gồ ghề (Rough Crags)
-    PRESET_TERRACED = 5          // Hẻm núi bậc thang
+    PRESET_ISLANDS = 0,         // Quần đảo tự nhiên (Natural Archipelago)
+    PRESET_ROLLING_HILLS = 1,   // Đồi núi thoai thoải (Rolling Hills)
+    PRESET_ALPINE_RIDGES = 2,   // Dãy núi tuyết hùng vĩ (Snowy Peaks)
+    PRESET_TERRACED = 3,        // Hẻm núi bậc thang (Terraced Canyon)
+    PRESET_VOLCANO = 4,         // Miệng núi lửa (Volcano Crater)
+    PRESET_SINGLE_OCTAVE = 5    // Sóng địa hình đơn giản (Single Wave)
 };
 
 /**
