@@ -45,10 +45,11 @@ Giao diện được thiết kế hiện đại bám sát mô hình **"Perlin No
 
 ## 3. HƯỚNG DẪN THAO TÁC
 
-* **Chạy chương trình:** Nhấn **`F5`** trong VS Code hoặc gõ `make run`.
+* **Windows (MSYS2 UCRT64):** Cài `gcc`, `gdb`, `glfw`, `glm` trong `C:\msys64\ucrt64`. Trong VS Code, nhấn **`F5`** với cấu hình `Run Terrain Simulator`. Task sẽ cấu hình và build bằng CMake.
 * **Thao tác chuột:**
-  * **Giữ Chuột Phải:** Khóa chuột để quay góc nhìn 360 độ và bay lượn bằng `W, A, S, D, Space, Shift`.
-  * **Thả Chuột Phải:** Hiện con trỏ chuột để thao tác nút bấm và kéo slider trên Bảng điều khiển Tiếng Việt.
+  * **Giữ Chuột Trái/Phải và rê:** Xoay góc nhìn camera tại vị trí hiện tại.
+  * **Giữ Chuột Giữa và rê:** Quay camera 360 độ quanh toàn bộ bản đồ.
+  * **Thả chuột:** Hiện con trỏ để thao tác nút bấm và kéo slider trên Bảng điều khiển Tiếng Việt.
 * **Phím tắt nhanh:**
   * `TAB`: Bật/tắt nhanh khung dây.
   * `ESC`: Thoát ứng dụng.

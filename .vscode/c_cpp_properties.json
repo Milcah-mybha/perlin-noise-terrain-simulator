@@ -1,20 +1,17 @@
 {
     "configurations": [
         {
-            "name": "Linux",
+            "name": "Windows (MSYS2 UCRT64)",
+            "compilerPath": "C:/msys64/ucrt64/bin/g++.exe",
+            "intelliSenseMode": "windows-gcc-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json",
             "includePath": [
                 "${workspaceFolder}/include",
                 "${workspaceFolder}/include/imgui",
-                "${workspaceFolder}/include/**",
-                "${workspaceFolder}/src/**",
-                "/usr/include",
-                "/usr/local/include"
-            ],
-            "defines": [],
-            "compilerPath": "/usr/bin/g++",
-            "cStandard": "c11",
-            "cppStandard": "c++17",
-            "intelliSenseMode": "linux-gcc-x64"
+                "C:/msys64/ucrt64/include"
+            ]
         }
     ],
     "version": 4

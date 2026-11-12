@@ -21,15 +21,17 @@ int windowWidth = 1366;
 int windowHeight = 768;
 
 const glm::vec3 DEFAULT_CAM_POS(0.0f, 85.0f, 135.0f);
+const glm::vec3 MAP_ORBIT_CENTER(0.0f, 15.0f, 0.0f);
 const float DEFAULT_YAW   = -90.0f;
-const float DEFAULT_PITCH = -30.0f;
+const float DEFAULT_CAMERA_PITCH = -30.0f;
 
-Camera camera(DEFAULT_CAM_POS, glm::vec3(0.0f, 1.0f, 0.0f), DEFAULT_YAW, DEFAULT_PITCH);
+Camera camera(DEFAULT_CAM_POS, glm::vec3(0.0f, 1.0f, 0.0f), DEFAULT_YAW, DEFAULT_CAMERA_PITCH);
 
 float lastX = 1366 / 2.0f;
 float lastY = 768 / 2.0f;
 bool firstMouse = true;
 bool isDraggingCamera = false;
+bool isOrbitingMap = false;
 bool fpsMode = false;
 
 float deltaTime = 0.0f;
@@ -228,7 +230,7 @@ int main() {
             }
             ImGui::SameLine();
             if (ImGui::Button("Góc nhìn chuẩn [R]")) {
-                camera.Reset(DEFAULT_CAM_POS, DEFAULT_YAW, DEFAULT_PITCH);
+                camera.Reset(DEFAULT_CAM_POS, DEFAULT_YAW, DEFAULT_CAMERA_PITCH);
             }
         }
         ImGui::End();
@@ -359,6 +361,7 @@ int main() {
 
             ImGui::TextColored(ImVec4(0.3f, 1.0f, 0.6f, 1.0f), "Thao tác chuột & bàn phím:");
             ImGui::BulletText("Nhấn giữ Chuột (Trái/Phải): Rê để xoay 360°");
+            ImGui::BulletText("Nhấn giữ Chuột Giữa: Rê để xoay quanh toàn bản đồ");
             ImGui::BulletText("Buông chuột: Chuột tự do bấm nút / thanh trượt");
             ImGui::BulletText("W, A, S, D: Lướt tới / lùi / trái / phải");
             ImGui::BulletText("Space / Ctrl: Bay lên cao / Hạ xuống thấp");
@@ -424,7 +427,7 @@ void processInput(GLFWwindow* window) {
 
     static bool rPressed = false;
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS && !rPressed) {
-        camera.Reset(DEFAULT_CAM_POS, DEFAULT_YAW, DEFAULT_PITCH);
+        camera.Reset(DEFAULT_CAM_POS, DEFAULT_YAW, DEFAULT_CAMERA_PITCH);
         rPressed = true;
     }
     if (glfwGetKey(window, GLFW_KEY_R) == GLFW_RELEASE) rPressed = false;
@@ -437,22 +440,37 @@ void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_TAB) == GLFW_RELEASE) tabPressed = false;
 }
 
-// Xu ly su kien nhan giu chuot trai/phai de xoay goc nhin
+// Chuot trai/phai xoay tai cho; chuot giua orbit quanh tam ban do
 void mouse_button_callback(GLFWwindow* window, int button, int action, int mods) {
     ImGuiIO& io = ImGui::GetIO();
 
-    if (io.WantCaptureMouse) {
-        isDraggingCamera = false;
+    if (action == GLFW_RELEASE) {
+        if (button == GLFW_MOUSE_BUTTON_LEFT || button == GLFW_MOUSE_BUTTON_RIGHT) {
+            isDraggingCamera = false;
+        }
+        if (button == GLFW_MOUSE_BUTTON_MIDDLE) {
+            isOrbitingMap = false;
+        }
         return;
     }
 
-    if (button == GLFW_MOUSE_BUTTON_LEFT || button == GLFW_MOUSE_BUTTON_RIGHT) {
-        if (action == GLFW_PRESS) {
-            isDraggingCamera = true;
-            firstMouse = true;
-        } else if (action == GLFW_RELEASE) {
-            isDraggingCamera = false;
-        }
+    if (io.WantCaptureMouse) {
+        isDraggingCamera = false;
+        isOrbitingMap = false;
+        return;
+    }
+
+    if (action == GLFW_PRESS &&
+        (button == GLFW_MOUSE_BUTTON_LEFT || button == GLFW_MOUSE_BUTTON_RIGHT)) {
+        isDraggingCamera = true;
+        isOrbitingMap = false;
+        firstMouse = true;
+    }
+
+    if (action == GLFW_PRESS && button == GLFW_MOUSE_BUTTON_MIDDLE) {
+        isOrbitingMap = true;
+        isDraggingCamera = false;
+        firstMouse = true;
     }
 }
 
@@ -473,7 +491,9 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn) {
     lastX = xpos;
     lastY = ypos;
 
-    if (isDraggingCamera || fpsMode) {
+    if (isOrbitingMap) {
+        camera.OrbitAround(MAP_ORBIT_CENTER, xoffset, yoffset);
+    } else if (isDraggingCamera || fpsMode) {
         camera.ProcessMouseMovement(xoffset, yoffset);
     }
 }

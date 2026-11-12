@@ -48,6 +48,8 @@ public:
 
     void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
 
+    void OrbitAround(const glm::vec3& target, float xoffset, float yoffset);
+
     void ProcessMouseScroll(float yoffset);
 
     void SetSprint(bool enable) { isSprint = enable; }

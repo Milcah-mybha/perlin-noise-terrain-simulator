@@ -2,39 +2,51 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Configure Project",
+            "type": "process",
+            "command": "cmake",
+            "args": [
+                "-S", "${workspaceFolder}",
+                "-B", "${workspaceFolder}/build",
+                "-G", "MinGW Makefiles",
+                "-DCMAKE_C_COMPILER=C:/msys64/ucrt64/bin/gcc.exe",
+                "-DCMAKE_CXX_COMPILER=C:/msys64/ucrt64/bin/g++.exe",
+                "-DCMAKE_PREFIX_PATH=C:/msys64/ucrt64",
+                "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+            ],
+            "problemMatcher": []
+        },
+        {
             "label": "Build Project",
-            "type": "shell",
-            "command": "make",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
+            "type": "process",
+            "command": "cmake",
+            "args": ["--build", "${workspaceFolder}/build", "--parallel", "4"],
+            "dependsOn": "Configure Project",
             "problemMatcher": ["$gcc"],
             "group": {
                 "kind": "build",
                 "isDefault": true
-            },
-            "detail": "Biên dịch dự án Terrain Simulator bằng make"
+            }
         },
         {
             "label": "Run Simulator",
-            "type": "shell",
-            "command": "./terrain_simulator",
+            "type": "process",
+            "command": "${workspaceFolder}/build/terrain_simulator.exe",
             "options": {
-                "cwd": "${workspaceFolder}"
+                "cwd": "${workspaceFolder}/build",
+                "env": {
+                    "PATH": "C:\\msys64\\ucrt64\\bin;${env:PATH}"
+                }
             },
             "dependsOn": "Build Project",
-            "problemMatcher": [],
-            "detail": "Biên dịch và chạy chương trình Terrain Simulator"
+            "problemMatcher": []
         },
         {
             "label": "Clean Project",
-            "type": "shell",
-            "command": "make clean",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": [],
-            "detail": "Dọn dẹp các tệp object và binary đã biên dịch"
+            "type": "process",
+            "command": "cmake",
+            "args": ["--build", "${workspaceFolder}/build", "--target", "clean"],
+            "problemMatcher": []
         }
     ]
 }

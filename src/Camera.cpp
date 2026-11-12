@@ -55,6 +55,41 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPi
     }
 }
 
+// Quay camera quanh mot diem muc tieu, giu nguyen khoang cach hien tai
+void Camera::OrbitAround(const glm::vec3& target, float xoffset, float yoffset) {
+    glm::vec3 offset = Position - target;
+    float radius = glm::length(offset);
+    if (radius < 1.0f) {
+        radius = 1.0f;
+        offset = glm::vec3(0.0f, 0.0f, radius);
+    }
+
+    float horizontalDistance = std::sqrt(offset.x * offset.x + offset.z * offset.z);
+    float azimuth = std::atan2(offset.z, offset.x);
+    float elevation = std::atan2(offset.y, horizontalDistance);
+
+    azimuth -= glm::radians(xoffset * MouseSensitivity);
+    elevation += glm::radians(yoffset * MouseSensitivity);
+    elevation = std::clamp(elevation, glm::radians(5.0f), glm::radians(85.0f));
+
+    float horizontalRadius = radius * std::cos(elevation);
+    Position = target + glm::vec3(
+        horizontalRadius * std::cos(azimuth),
+        radius * std::sin(elevation),
+        horizontalRadius * std::sin(azimuth)
+    );
+
+    glm::vec3 lookDirection = glm::normalize(target - Position);
+    float lookYaw = glm::degrees(std::atan2(lookDirection.z, lookDirection.x));
+    float lookPitch = glm::degrees(std::asin(std::clamp(lookDirection.y, -1.0f, 1.0f)));
+
+    Yaw = targetYaw = lookYaw;
+    Pitch = targetPitch = lookPitch;
+    targetVelocity = glm::vec3(0.0f);
+    currentVelocity = glm::vec3(0.0f);
+    updateCameraVectors();
+}
+
 // Xu ly phong to thu nho (FoV Zoom) bang cuon chuot
 void Camera::ProcessMouseScroll(float yoffset) {
     targetZoom -= yoffset * 2.5f;
