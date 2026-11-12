@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "Configure Project",
+            "label": "Configure Project (Windows)",
             "type": "process",
             "command": "cmake",
             "args": [
@@ -18,34 +18,56 @@
         },
         {
             "label": "Build Project",
-            "type": "process",
-            "command": "cmake",
-            "args": ["--build", "${workspaceFolder}/build", "--parallel", "4"],
-            "dependsOn": "Configure Project",
+            "type": "shell",
+            "command": "make",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "windows": {
+                "command": "cmake",
+                "args": ["--build", "${workspaceFolder}/build", "--parallel", "4"],
+                "dependsOn": "Configure Project (Windows)"
+            },
             "problemMatcher": ["$gcc"],
             "group": {
                 "kind": "build",
                 "isDefault": true
-            }
+            },
+            "detail": "Biên dịch dự án Terrain Simulator"
         },
         {
             "label": "Run Simulator",
-            "type": "process",
-            "command": "${workspaceFolder}/build/terrain_simulator.exe",
+            "type": "shell",
+            "command": "./terrain_simulator",
             "options": {
-                "cwd": "${workspaceFolder}/build",
-                "env": {
-                    "PATH": "C:\\msys64\\ucrt64\\bin;${env:PATH}"
+                "cwd": "${workspaceFolder}"
+            },
+            "windows": {
+                "type": "process",
+                "command": "${workspaceFolder}/build/terrain_simulator.exe",
+                "options": {
+                    "cwd": "${workspaceFolder}/build",
+                    "env": {
+                        "PATH": "C:\\msys64\\ucrt64\\bin;${env:PATH}"
+                    }
                 }
             },
             "dependsOn": "Build Project",
-            "problemMatcher": []
+            "problemMatcher": [],
+            "detail": "Chạy Terrain Simulator"
         },
         {
             "label": "Clean Project",
-            "type": "process",
-            "command": "cmake",
-            "args": ["--build", "${workspaceFolder}/build", "--target", "clean"],
+            "type": "shell",
+            "command": "make clean",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "windows": {
+                "type": "process",
+                "command": "cmake",
+                "args": ["--build", "${workspaceFolder}/build", "--target", "clean"]
+            },
             "problemMatcher": []
         }
     ]

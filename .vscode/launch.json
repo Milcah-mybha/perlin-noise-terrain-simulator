@@ -2,23 +2,35 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run Terrain Simulator",
+            "name": "Chạy Terrain Simulator (F5)",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/terrain_simulator.exe",
+            "program": "${workspaceFolder}/terrain_simulator",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${workspaceFolder}/build",
-            "environment": [
-                {
-                    "name": "PATH",
-                    "value": "C:\\msys64\\ucrt64\\bin;${env:PATH}"
-                }
-            ],
+            "cwd": "${workspaceFolder}",
+            "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "miDebuggerPath": "C:/msys64/ucrt64/bin/gdb.exe",
-            "preLaunchTask": "Build Project"
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "preLaunchTask": "Build Project",
+            "windows": {
+                "program": "${workspaceFolder}/build/terrain_simulator.exe",
+                "cwd": "${workspaceFolder}/build",
+                "miDebuggerPath": "C:/msys64/ucrt64/bin/gdb.exe",
+                "environment": [
+                    {
+                        "name": "PATH",
+                        "value": "C:\\msys64\\ucrt64\\bin;${env:PATH}"
+                    }
+                ]
+            }
         }
     ]
 }
