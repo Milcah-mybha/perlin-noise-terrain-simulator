@@ -3,10 +3,10 @@ CXX = g++
 ifeq ($(OS),Windows_NT)
 MSYS_DRIVE := $(word 1,$(subst /, ,$(CURDIR)))
 PROJECT_ROOT := $(patsubst /$(MSYS_DRIVE)/%,$(MSYS_DRIVE):/%,$(CURDIR))/
-else
-PROJECT_ROOT := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-endif
 INCLUDE_FLAGS = -I"$(PROJECT_ROOT)include" -I"$(PROJECT_ROOT)include/imgui"
+else
+INCLUDE_FLAGS = -Iinclude -Iinclude/imgui
+endif
 CFLAGS = -Wall -O2 $(INCLUDE_FLAGS)
 CXXFLAGS = -std=c++17 -Wall -O2 $(INCLUDE_FLAGS)
 LDFLAGS = -lglfw -lGL -ldl -lpthread

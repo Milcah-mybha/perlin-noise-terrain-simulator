@@ -1,6 +1,21 @@
 {
     "configurations": [
         {
+            "name": "Linux",
+            "compilerPath": "/usr/bin/g++",
+            "intelliSenseMode": "linux-gcc-x64",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "includePath": [
+                "${workspaceFolder}/include",
+                "${workspaceFolder}/include/imgui",
+                "${workspaceFolder}/include/**",
+                "${workspaceFolder}/src/**",
+                "/usr/include",
+                "/usr/local/include"
+            ]
+        },
+        {
             "name": "Windows (MSYS2 UCRT64)",
             "compilerPath": "C:/msys64/ucrt64/bin/g++.exe",
             "intelliSenseMode": "windows-gcc-x64",
